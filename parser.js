@@ -8,37 +8,46 @@ const msgs = require('./data/msgs.js');
 const recs = [];
 
 for (let msg of msgs) {
-  let rec = {txt: null, role: null, tels: null, from: null, to: null};
+  let rec = { txt: null, role: null, from: null, to: null, tels: null };
   rec.txt = msg.txt;
   if (msg.txt.match(/маршрут/i)) {
-    rec.role = 'M';
-    recs.push(rec);
-    continue;  
+    continue;
+    // rec.role = 'M';
+    // recs.push(rec);
   }
 
   rec.role = parseRole(msg.txt);
   rec.tels = parseTel(msg.txt);
-
+  
   rec.from = parseDirection('from', msg.txt);
   rec.to = parseDirection('to', msg.txt);
+
+  if(!(rec.from && rec.to)) {
+    rec.dashRoute = parseDashRoute(msg.txt);
+  }
 
   recs.push(rec);
 }
 
-function parseDirection(direction, msg) {
+function parseDashRoute(txt) {
+  let dashRoute = txt.match(/[А-Яа-я]+\s*-\s*[А-Яа-я]+/i);
+  return dashRoute;
+}
+
+function parseDirection(direction, txt) {
   let dirRegEx = '';
   switch (direction) {
     case 'from':
-      dirRegEx = /(с|из|от)\s+[А-Яа-я]+/i;
+      dirRegEx = /\s+(с|из|от)\s+([А-Яа-я]+)/i;
       break;
     case 'to':
-      dirRegEx = /(в|до)\s+[А-Яа-я]+/i;
+      dirRegEx = /\s+(в|до)\s+([А-Яа-я]+)/i;
       break;
   }
 
-  let dirMatch = msg.match(dirRegEx);
+  let dirMatch = txt.match(dirRegEx);
   if (dirMatch) {
-    let token = dirMatch[0].split(/\s+/)[1];
+    let token = dirMatch[2]; // берем вторую скобочную группу
     let point = points.find((point) => {
       return point.names.includes(token.toLocaleLowerCase());
     });
