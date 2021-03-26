@@ -41,4 +41,4 @@ const points = [
   },
 ];
 
-module.exports = points;
+export default points;
