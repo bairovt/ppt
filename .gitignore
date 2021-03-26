@@ -3,8 +3,8 @@ build/
 public/
 .idea/
 npm-debug.log
-config/production.js
-config/development.js
+config/production.*
+config/development.*
 log/
 aql/
 test_data/

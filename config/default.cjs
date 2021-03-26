@@ -1,8 +1,10 @@
 'use strict';
-const path = require('path');
+// const path = require('path');
+
 const root = process.cwd();
 
 module.exports = {
+// export default {
   // secret data can be moved to env variables
   // or a separate config
   botToken: ['super creazy secret key'],
