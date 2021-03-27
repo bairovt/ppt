@@ -1,44 +1,13 @@
 'use strict';
-import fs from 'fs';
 
 import points from './data/points.js';
-import msgs from './data/msgs.js';
-
-const recs = [];
-
-for (let msg of msgs) {
-  let rec = { txt: null, role: null, from: null, to: null, tels: null };
-  rec.txt = msg.txt;
-  rec.len = msg.txt.length;
-  if (msg.txt.match(/маршрут/i)) {
-    continue;
-    // rec.role = 'M';
-    // recs.push(rec);
-  }
-
-  rec.role = parseRole(msg.txt);
-  rec.tels = parseTel(msg.txt);
-
-  rec.from = parseDirection('from', msg.txt);
-  rec.to = parseDirection('to', msg.txt);
-
-  // if(!(rec.from && rec.to)) {
-  //   rec.dashRoute = parseDashRoute(msg.txt);
-  // }
-
-  if (!(rec.from && rec.to)) {
-    rec.spaceRoute = parseSpaceRoute(msg.txt);
-  }
-
-  recs.push(rec);
-}
 
 function parseSpaceRoute(txt) {
   let cleanedTxt = txt.replace(
     /\d|еду|ищу|машин\S*|возьм\S*|пас+аж\S*|п(о|а)пут\S*|есть|мест\S*|од(но|ин)|дв(а|ое)|тр(и|ое)|выез\S*|сегод\S*|завтра|утро.|день|дн(е|ё)м|вечер(ом)?|т(е|и)чен\S*|пр(и|е)мер\S*|где(\s*-*\s*)то|(о|а)р(ие|и|е)нт(и|е)р\S*|час\S*|на\s+|в\s+|[\.,\?:\\\/\(\)]|\w|\n|тел\S*/gi,
     ''
   );
-  cleanedTxt = cleanedTxt.replace(/(-|-)\s*$/g, '');  
+  cleanedTxt = cleanedTxt.replace(/(-|-)\s*$/g, '');
   return cleanedTxt.trim();
 }
 
@@ -92,6 +61,34 @@ function parseRole(msg) {
   return null;
 }
 
-let recsJson = JSON.stringify(recs, null, 2);
+export default function parse(msgs) {
+  const recs = [];
 
-fs.writeFileSync('./result_recs.json', recsJson);
+  for (let msg of msgs) {
+    let rec = { txt: null, role: null, from: null, to: null, tels: null };
+    rec.txt = msg.txt;
+    rec.len = msg.txt.length;
+    if (msg.txt.match(/маршрут/i)) {
+      continue;
+      // rec.role = 'M';
+      // recs.push(rec);
+    }
+
+    rec.role = parseRole(msg.txt);
+    rec.tels = parseTel(msg.txt);
+
+    rec.from = parseDirection('from', msg.txt);
+    rec.to = parseDirection('to', msg.txt);
+
+    // if(!(rec.from && rec.to)) {
+    //   rec.dashRoute = parseDashRoute(msg.txt);
+    // }
+
+    if (!(rec.from && rec.to)) {
+      rec.spaceRoute = parseSpaceRoute(msg.txt);
+    }
+
+    recs.push(rec);
+  }
+  return recs;
+}
