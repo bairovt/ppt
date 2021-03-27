@@ -81,7 +81,7 @@ function parseTel(msg) {
 
 function parseRole(msg) {
   // todo tests
-  const driverRegex = /еду|в(о|а)зьму|ищу\s+пас|ищу\s+попутчик/i;
+  const driverRegex = /еду|в(о|а)зьм(у|ем|ём)|ищу\s+пас|ищу\s+попутчик/i;
   const passRegex = /ищу|ищем|пас+ажир|ед(е|и|у)т/i;
   // ищем сначала водителей из-за "ищу пас / попутчик"
   if (msg.match(driverRegex)) return 'D';

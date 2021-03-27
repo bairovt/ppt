@@ -27,7 +27,7 @@ const points = [
   {
     _key: 'Borzya',
     name: 'Борзя',
-    names: ['борзя', 'борзи', 'борзю'],
+    names: ['борзя', 'борзи', 'борзю', 'борзию'],
   },
   {
     _key: 'Zabaikalsk',
@@ -38,6 +38,11 @@ const points = [
     _key: 'Krasnokamensk',
     name: 'Краснокаменск',
     names: ['краснокаменск', 'краснокаменска'],
+  },
+  {
+    _key: 'Krasnokamensk',
+    name: 'Цасучей',
+    names: ['цасучей', 'cасучей', 'цасучея', 'цасучея'],
   },
 ];
 
