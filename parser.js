@@ -2,21 +2,21 @@
 
 import points from './data/points.js';
 
-function parseSpaceRoute(txt) {
-  let cleanedTxt = txt.replace(
+function parseSpaceRoute(body) {
+  let cleanedBody = body.replace(
     /\d|еду|ищу|машин\S*|возьм\S*|пас+аж\S*|п(о|а)пут\S*|есть|мест\S*|од(но|ин)|дв(а|ое)|тр(и|ое)|выез\S*|сегод\S*|завтра|утро.|день|дн(е|ё)м|вечер(ом)?|т(е|и)чен\S*|пр(и|е)мер\S*|где(\s*-*\s*)то|(о|а)р(ие|и|е)нт(и|е)р\S*|час\S*|на\s+|в\s+|[\.,\?:\\\/\(\)]|\w|\n|тел\S*/gi,
     ''
   );
-  cleanedTxt = cleanedTxt.replace(/(-|-)\s*$/g, '');
-  return cleanedTxt.trim();
+  cleanedBody = cleanedBody.replace(/(-|-)\s*$/g, '');
+  return cleanedBody.trim();
 }
 
-function parseDashRoute(txt) {
-  let dashRoute = txt.match(/[А-Яа-я]+\s*-\s*[А-Яа-я]+/i);
+function parseDashRoute(body) {
+  let dashRoute = body.match(/[А-Яа-я]+\s*-\s*[А-Яа-я]+/i);
   return dashRoute;
 }
 
-function parseDirection(direction, txt) {
+function parseDirection(direction, body) {
   let dirRegEx = '';
   switch (direction) {
     case 'from':
@@ -27,7 +27,7 @@ function parseDirection(direction, txt) {
       break;
   }
 
-  let dirMatch = txt.match(dirRegEx);
+  let dirMatch = body.match(dirRegEx);
   if (dirMatch) {
     let token = dirMatch[2]; // берем вторую скобочную группу
     let point = points.find((point) => {
@@ -61,34 +61,31 @@ function parseRole(msg) {
   return null;
 }
 
-export default function parse(msgs) {
-  const recs = [];
+export function parseMsg(msg) {
+  let rec = {
+    role: null,
+    from: null,
+    to: null,    
+    tels: null,
+    ...msg
+  };
+  rec.len = msg.Body.length;
 
-  for (let msg of msgs) {
-    let rec = { txt: null, role: null, from: null, to: null, tels: null };
-    rec.txt = msg.txt;
-    rec.len = msg.txt.length;
-    if (msg.txt.match(/маршрут/i)) {
-      continue;
-      // rec.role = 'M';
-      // recs.push(rec);
-    }
+  if (msg.Body.match(/маршрут/i)) return null;
 
-    rec.role = parseRole(msg.txt);
-    rec.tels = parseTel(msg.txt);
+  rec.role = parseRole(msg.Body);
+  rec.tels = parseTel(msg.Body);
 
-    rec.from = parseDirection('from', msg.txt);
-    rec.to = parseDirection('to', msg.txt);
+  rec.from = parseDirection('from', msg.Body);
+  rec.to = parseDirection('to', msg.Body);
 
-    // if(!(rec.from && rec.to)) {
-    //   rec.dashRoute = parseDashRoute(msg.txt);
-    // }
+  // if(!(rec.from && rec.to)) {
+  //   rec.dashRoute = parseDashRoute(msg.Body);
+  // }
 
-    if (!(rec.from && rec.to)) {
-      rec.spaceRoute = parseSpaceRoute(msg.txt);
-    }
-
-    recs.push(rec);
+  if (!(rec.from && rec.to)) {
+    rec.spaceRoute = parseSpaceRoute(msg.Body);
   }
-  return recs;
+  if (rec === null) console.log('null rec: ', msg);
+  return rec;
 }
