@@ -23,18 +23,35 @@ async function main(){
       lastEventId = getStartEventId(24*3);
     }
     const msgs = fetchViberDb(lastEventId, 10000);
-    fs.writeFileSync('./recstmp.json', JSON.stringify(msgs, null, 2));
     const recsCollection = db.collection('Recs');
+    const recs = [];
     let counter = 0;
+    
+    console.log('msgs count: ' + msgs.length);
     for (let msg of msgs) {
       const rec = parseMsg(msg);
       if (rec) {
-        await recsCollection.save(rec);
-        counter++;
-        console.log('added');
+        const newRec = await recsCollection.save(rec, {returnNew: true});
+        const newRecPart = {
+          ChatName: newRec.new.ChatName,
+          role: newRec.new.role,
+          from: newRec.new.from,
+          to: newRec.new.to,
+          Body: newRec.new.Body,
+          ClientName: newRec.new.ClientName,
+          tels: newRec.new.tels,
+        };
+        recs.push(newRecPart);
       }      
     }
-    console.log('counter: ', counter);
+
+    // recs = await Promise.all(msgs.map(msg => {
+    //   const rec = parseMsg(msg);
+    //   return recsCollection.save(rec, {returnNew: true});
+    // }));
+
+    console.log('recs count: ' + recs.length);    
+    fs.writeFileSync('./result_recs.json', JSON.stringify(recs, null, 2));
   } catch (err) {
     console.error(err)
   }
