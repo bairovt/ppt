@@ -1,48 +1,46 @@
-import {aql} from 'arangojs';
+import { aql } from 'arangojs';
 import fs from 'fs';
 import db from './lib/arangodb.js';
 
-
-import {fetchViberDb, getStartEventId} from './fetchdb.js';
-import {parseMsg} from './parser.js';
-
+import { fetchViberDb, getStartEventId } from './fetchdb.js';
+import { parseMsg } from './parser.js';
+import { findFromTo } from './find.js';
 
 // setInterval(() => {
 //   fetchViberDb()
 // }, 60*1000)
 
-async function main(){
+async function main() {
   try {
-    let lastEventId = await db.query(aql`
+    let lastEventId = await db
+      .query(
+        aql`
       FOR r in Recs
         SORT r.eventId DESC
         LIMIT 1
         RETURN r.eventId
-    `).then(cursor => cursor.next());
+    `
+      )
+      .then((cursor) => cursor.next());
     if (!lastEventId) {
-      lastEventId = getStartEventId(24*3);
+      lastEventId = getStartEventId(24 * 3);
     }
     const msgs = fetchViberDb(lastEventId, 10000);
+
     const recsCollection = db.collection('Recs');
+    await recsCollection.truncate();
+
     const recs = [];
-    let counter = 0;
-    
+    let counter = 0;    
+
     console.log('msgs count: ' + msgs.length);
     for (let msg of msgs) {
       const rec = parseMsg(msg);
+
       if (rec) {
-        const newRec = await recsCollection.save(rec, {returnNew: true});
-        const newRecPart = {
-          ChatName: newRec.new.ChatName,
-          role: newRec.new.role,
-          from: newRec.new.from,
-          to: newRec.new.to,
-          Body: newRec.new.Body,
-          ClientName: newRec.new.ClientName,
-          tels: newRec.new.tels,
-        };
-        recs.push(newRecPart);
-      }      
+        const newRec = await recsCollection.save(rec, { returnNew: true });
+        recs.push(newRec);
+      }
     }
 
     // recs = await Promise.all(msgs.map(msg => {
@@ -52,10 +50,13 @@ async function main(){
 
     console.log('recs count: ' + recs.length);    
     fs.writeFileSync('./result_recs.json', JSON.stringify(recs, null, 2));
+    
+    console.log('============= Found From To ===============');
+    let found = await findFromTo({from: 'Краснокаменск', to: 'Чита'});
+    console.log(JSON.stringify(found, null, 2));
   } catch (err) {
-    console.error(err)
+    console.error(err);
   }
-};
+}
 
 main();
-
