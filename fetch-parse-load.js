@@ -7,6 +7,7 @@ import { parseMsg } from './parser.js';
 import { findFromTo } from './find.js';
 
 async function main() {
+  let startTime = Date.now();
   try {
     let lastEventId = await db
       .query(
@@ -62,6 +63,7 @@ async function main() {
   } catch (err) {
     console.error(err);
   }
+  console.log(Date.now() - startTime);
 }
 
 main();
