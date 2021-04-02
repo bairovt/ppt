@@ -1,20 +1,7 @@
 'use strict';
 
 import points from './data/points.js';
-
-export function parseSpaceRoute(body) {
-  let cleanedBody = body.replace(
-    /\d|еду|ищу|машин\S*|возьм\S*|пас+аж\S*|п(о|а)пут\S*|есть|мест\S*|од(но|ин)|дв(а|ое)|тр(и|ое)|выез\S*|сегод\S*|завтра|утро.|день|дн(е|ё)м|вечер(ом)?|т(е|и)чен\S*|пр(и|е)мер\S*|где(\s*-*\s*)то|(о|а)р(ие|и|е)нт(и|е)р\S*|час\S*|на\s+|в\s+|[\.,\?:\\\/\(\)]|\w|\n|тел\S*/gi,
-    ''
-  );
-  cleanedBody = cleanedBody.replace(/(-|-)\s*$/g, '');
-  return cleanedBody.trim();
-}
-
-export function parseDashRoute(body) {
-  let dashRoute = body.match(/[А-Яа-я]+\s*-\s*[А-Яа-я]+/i);
-  return dashRoute;
-}
+import {cleanBody} from './clean-body-parser.js';
 
 export function parseDirection(direction, body) {
   let directionRegEx = '';
@@ -28,7 +15,6 @@ export function parseDirection(direction, body) {
   }
 
   let directionMatch = body.match(directionRegEx);
-  console.log('directionMatch: ' + directionMatch);
   if (directionMatch) {
     let token = directionMatch[2]; // берем вторую скобочную группу
     let point = points.find((point) => {
@@ -66,26 +52,22 @@ export function parseMsg(msg) {
   let rec = {
     role: null,
     from: null,
-    to: null,    
+    to: null,
     tels: null,
-    ...msg
+    ...msg,
   };
-  rec.len = msg.Body.length;
 
-  if (msg.Body.match(/маршрут/i)) rec.role = 'M';
+  if (msg.Body.match(/маршрут/i)) {
+    rec.role = 'M';
+  } else {
+    rec.role = parseRole(msg.Body);
+    rec.tels = parseTel(msg.Body);
 
-  rec.role = parseRole(msg.Body);
-  rec.tels = parseTel(msg.Body);
+    rec.from = parseDirection('from', msg.Body);
+    rec.to = parseDirection('to', msg.Body);
 
-  rec.from = parseDirection('from', msg.Body);
-  rec.to = parseDirection('to', msg.Body);
-
-  // if(!(rec.from && rec.to)) {
-  //   rec.dashRoute = parseDashRoute(msg.Body);
-  // }
-
-  if (!(rec.from && rec.to)) {
-    rec.spaceRoute = parseSpaceRoute(msg.Body);
+    rec.cleanedBody = cleanBody(msg.Body);
   }
+
   return rec;
 }

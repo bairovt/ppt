@@ -6,10 +6,6 @@ import { fetchViberDb, getStartEventId } from './fetchdb.js';
 import { parseMsg } from './parser.js';
 import { findFromTo } from './find.js';
 
-// setInterval(() => {
-//   fetchViberDb()
-// }, 60*1000)
-
 async function main() {
   try {
     let lastEventId = await db
@@ -31,12 +27,11 @@ async function main() {
     await recsCollection.truncate();
 
     const recs = [];
-    let counter = 0;    
 
     console.log('msgs count: ' + msgs.length);
+
     for (let msg of msgs) {
       const rec = parseMsg(msg);
-
       if (rec) {
         const newRec = await recsCollection.save(rec, { returnNew: true });
         recs.push(newRec);
@@ -53,6 +48,7 @@ async function main() {
     
     console.log('============= Found From To ===============');
     let found = await findFromTo({from: 'Краснокаменск', to: 'Чита'});
+    // let found = await findFromTo({ from: 'Чита', to: 'Агинское' });
     console.log(JSON.stringify(found, null, 2));
   } catch (err) {
     console.error(err);
