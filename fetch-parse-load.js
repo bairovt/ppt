@@ -27,9 +27,7 @@ async function main() {
     const recsCollection = db.collection('Recs');
     await recsCollection.truncate();
 
-    const recs = [];
-
-    console.log('msgs count: ' + msgs.length);
+    const recs = [];    
 
     for (let msg of msgs) {
       const rec = parseMsg(msg);
@@ -53,17 +51,19 @@ async function main() {
       }
     }
 
-    console.log('recs count: ' + recs.length);    
-    fs.writeFileSync('./result_recs.json', JSON.stringify(recs, null, 2));
+    console.log('msgs count: ' + msgs.length);
+    console.log('recs count: ' + recs.length);
+
+    // fs.writeFileSync('./result_recs.json', JSON.stringify(recs, null, 2));
     
-    console.log('============= Found From To ===============');
-    let found = await findFromTo({from: 'Агинское', to: 'Чита'});
-    // let found = await findFromTo({ from: 'Чита', to: 'Агинское' });
-    console.log(JSON.stringify(found, null, 2));
+    // console.log('============= Found From To ===============');
+    // let found = await findFromTo({from: 'Агинское', to: 'Чита'});
+    // console.log(JSON.stringify(found, null, 2));
+
   } catch (err) {
     console.error(err);
   }
-  console.log(Date.now() - startTime);
+  console.log(Date.now() - startTime + ' мс');
 }
 
 main();

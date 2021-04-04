@@ -59,6 +59,8 @@ export function parseMsg(msg) {
 
   if (msg.Body.match(/маршрут/i)) {
     rec.role = 'M';
+  } else if (msg.Body.match(/груз/i)) {
+    rec.role = 'G';
   } else {
     rec.role = parseRole(msg.Body);
     rec.tels = parseTel(msg.Body);
