@@ -57,7 +57,7 @@ export function parseMsg(msg) {
     ...msg,
   };
 
-  if (msg.Body.match(/маршрут/i)) {
+  if (msg.Body.match(/расписани|маршрут|автобус/i)) {
     rec.role = 'M';
   } else if (msg.Body.match(/груз/i)) {
     rec.role = 'G';
