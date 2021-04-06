@@ -40,7 +40,16 @@ async function main() {
           if (err.code === 409 && err.errorNum === 1210) {
             let existingRec = await recsCollection.byExample({ Body: rec.Body })
               .then((cursor) => cursor.next());
-            console.log('existingRec', existingRec);
+            console.log('existingRec', {
+              role: existingRec.role,
+              Body: existingRec.Body,
+              from: existingRec.from,
+              to: existingRec.to,
+              ChatName: existingRec.ChatName,
+              ClientName: existingRec.ClientName,
+              TimeStamp: existingRec.TimeStamp,
+              cleanedBody: existingRec.cleanedBody,
+            });
             if (existingRec.TimeStamp < rec.TimeStamp) {
               await recsCollection.update(existingRec._id, rec);
             }
