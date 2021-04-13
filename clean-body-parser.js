@@ -18,8 +18,9 @@ export function cleanBody(body) {
     /нужн\S*|жела\S*|н(е|и)обх\S*|остал\S*|сторон\S*|заран(е|и)|(от|раз)дельн\S*/gi,
     /в(а|о)тсап\S*|вайбер\S*|телеграм\S*|тел(\s|$)|первой|второй|п(о|а)л(о|а)вин\S*/gi,
     /п(о|а)жалуй?ста\S*|легк\S*|авто\S*|багаж\S*|груз\S*|водител\S*/gi,
+    /можно|чуть|(по)?раньше/gi,
     /тойот\S*|нис+ан\S*|хонд\S*|комфорт\S*/gi,
-    /\sс\s|\sв\s|\sво\s|\sдо\s|\sиз\s|\sи\s|\sили\s|\sпо\s|\sна\s|\sза\s|\sдля\s|\sа\s|\sбез\s|\sго\s/gi,
+    /\sс\s|\sв\s|\sво\s|\sдо\s|\sиз\s|\sи\s|\sили\s|\sпо\s|\sна\s|\sза\s|\sдля\s|\sа\s|\sбез\s|(-|\s)го\s/gi,
   ];  
 
   for (let regex of regexList) {
@@ -27,17 +28,18 @@ export function cleanBody(body) {
   }
 
   tmpstr = tmpstr.replace(/\s+[А-ЯЁа-яё]\s+/gi, ' '); // одиночные буквы
-  tmpstr = tmpstr.replace(/[\-\-]\s*[\-\-]/gi, ' '); // два тире (минус) разделенные пробелом
+  tmpstr = tmpstr.replace(/\-\s*\-/gi, ' '); // два тире разделенные пробелом
   tmpstr = tmpstr.trim();
-  tmpstr = tmpstr.replace(/(^[\-\-])|([\-\-]$)/, ''); // тире (минус) в начале
+  tmpstr = tmpstr.replace(/(^\-)|(\-$)/, ''); // тире в начале и конце
+  tmpstr = tmpstr.replace(/\s{2,}/g, ' '); // тире в начале и конце
 
   return tmpstr.trim();
 }
 
-export function cleanBodyParser(msg) {
-  let cleanedBody = cleanBody(msg.Body);
-  let words = cleanBody.split(/\s+/);
-  for (let word of words) {
-  }
-  return cleanedBody.trim();
+export function cleanedBodyParser(body) {
+  let cleanedBody = cleanBody(body);
+  let words = cleanedBody.split(/\s|\-/);
+  // for (let word of words) {
+  // }
+  return words;
 }

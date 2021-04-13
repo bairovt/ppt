@@ -7,6 +7,7 @@ const points = [
   {
     _key: 'UlanUde',
     name: 'Улан-Удэ',
+    dash: true,
     names: [
       'улан-удэ',
       'улан- удэ',
@@ -119,6 +120,11 @@ const points = [
     _key: 'Selenginsk',
     name: 'Селенгинск',
     names: ['селенгинск', 'селенгинска'],
+  },
+  {
+    _key: 'Kyahta',
+    name: 'Кяхта',
+    names: ['кяхта', 'кяхты', 'кяхту'],
   },
 ];
 
