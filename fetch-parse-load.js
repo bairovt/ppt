@@ -40,16 +40,20 @@ async function main() {
           if (err.code === 409 && err.errorNum === 1210) {
             let existingRec = await recsCollection.byExample({ Body: rec.Body })
               .then((cursor) => cursor.next());
-            console.log('existingRec', {
-              role: existingRec.role,
-              Body: existingRec.Body,
-              from: existingRec.from,
-              to: existingRec.to,
-              ChatName: existingRec.ChatName,
-              ClientName: existingRec.ClientName,
-              TimeStamp: existingRec.TimeStamp,
-              cleanedBody: existingRec.cleanedBody,
-            });
+              if (existingRec.role != 'M') {
+                console.log('existingRec', {
+                  role: existingRec.role,
+                  Body: existingRec.Body,
+                  from: existingRec.from,
+                  to: existingRec.to,
+                  ChatName: existingRec.ChatName,
+                  ClientName: existingRec.ClientName,
+                  TimeStamp: existingRec.TimeStamp,
+                  cleanedBody: existingRec.cleanedBody,
+                  route: existingRec.route,
+                });
+              }
+            
             if (existingRec.TimeStamp < rec.TimeStamp) {
               await recsCollection.update(existingRec._id, rec);
             }
@@ -66,7 +70,7 @@ async function main() {
     // fs.writeFileSync('./result_recs.json', JSON.stringify(recs, null, 2));
     
     // console.log('============= Found From To ===============');
-    // let found = await findFromTo({from: 'Агинское', to: 'Чита'});
+    // let found = await findFromTo({from: 'Могойтуй', to: 'Агинское'});
     // console.log(JSON.stringify(found, null, 2));
 
   } catch (err) {

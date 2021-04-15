@@ -1,7 +1,7 @@
 'use strict';
 
 import points from './data/points.js';
-import {cleanBody, cleanedBodyParser} from './clean-body-parser.js';
+import {cleanBody, routeParser} from './clean-body-parser.js';
 
 export function parseDirection(direction, body) {
   let directionRegEx = '';
@@ -70,7 +70,7 @@ export function parseMsg(msg) {
     rec.to = parseDirection('to', msg.Body);
 
     rec.cleanedBody = cleanBody(msg.Body);
-    rec.route = cleanedBodyParser(msg.Body);
+    rec.route = routeParser(msg.Body);
   }
 
   return rec;
