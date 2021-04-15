@@ -1,3 +1,5 @@
+import points from './data/points.js'
+
 //todo: сделать проверку городов на cleanBody
 export function cleanBody(body) {
   let tmpstr = ' ' + body + ' ';
@@ -37,9 +39,15 @@ export function cleanBody(body) {
 }
 
 export function cleanedBodyParser(body) {
+  const route = [];
   let cleanedBody = cleanBody(body);
   let words = cleanedBody.split(/\s|\-/);
-  // for (let word of words) {
-  // }
-  return words;
+  for (let word of words) {
+    let point = points.find((point, idx, points) => {
+      if (point.names.includes(word.toLocaleLowerCase())) return true;
+      return false;
+    });
+    if (point) route.push(point.name);
+  }
+  return route;
 }
