@@ -1,10 +1,8 @@
 import { aql } from 'arangojs';
-import fs from 'fs';
 import db from './lib/arangodb.js';
 
 import { fetchViberDb, getStartEventId } from './fetchdb.js';
 import { parseMsg } from './parser.js';
-import { findFromTo } from './find.js';
 
 async function main() {
   let startTime = Date.now();
@@ -65,13 +63,7 @@ async function main() {
     }
 
     console.log('msgs count: ' + msgs.length);
-    console.log('recs count: ' + recs.length);
-
-    // fs.writeFileSync('./result_recs.json', JSON.stringify(recs, null, 2));
-    
-    // console.log('============= Found From To ===============');
-    // let found = await findFromTo({from: 'Могойтуй', to: 'Агинское'});
-    // console.log(JSON.stringify(found, null, 2));
+    console.log('recs count: ' + recs.length);    
 
   } catch (err) {
     console.error(err);

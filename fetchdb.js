@@ -54,5 +54,3 @@ export function fetchViberDb(eventId, limit) {
   );
   return sqlStmt.all(chatTokens, { eventId, limit });
 }
-
-// console.log(JSON.stringify(fetchViberDb(106596, 10), null, 2));
