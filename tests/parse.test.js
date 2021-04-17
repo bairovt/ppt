@@ -21,10 +21,7 @@ describe('routeParser', ()=> {
         expect(routeParser(msg.body)).toEqual(msg.route);
       });
     }
-  }  
-  // test.each(msgs)('routeParser', (msg) => {
-  //   expect(routeParser(msg.body)).toEqual(msg.route);
-  // }); 
+  }   
 });
 
 describe('parseRole', () => {
