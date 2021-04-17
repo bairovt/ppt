@@ -1,10 +1,20 @@
 import points from './data/points.js'
 
 //todo: сделать проверку городов на cleanBody
-export function cleanBody(body) {
-  let tmpstr = ' ' + body + ' ';
+export function checkPairedNames(str) {
+  // todo: optimize this in the future
+  let newStr = str;
+  let pairedNamePoints = points.filter((point) => !!point.regex);
+  for (let point of pairedNamePoints) {
+    newStr = newStr.replace(point.regex, point.names[0])
+  }
+  return newStr;
+};
 
-  tmpstr = tmpstr.replace('‐', '-');
+export function cleanBody(body) {
+  let str = ' ' + body + ' ';
+
+  str = str.replace('‐', '-');
 
   let regexList = [
     /[\.,\?？:!\\\/\(\)\+]|\w|\d|\n/gi,
@@ -28,16 +38,18 @@ export function cleanBody(body) {
   ];  
 
   for (let regex of regexList) {
-    tmpstr = tmpstr.replace(regex, ' ');
+    str = str.replace(regex, ' ');
   }
 
-  tmpstr = tmpstr.replace(/\s+[А-ЯЁа-яё]\s+/gi, ' '); // одиночные буквы  
-  tmpstr = tmpstr.replace(/\-\s*\-/gi, ' '); // два тире разделенные пробелом
-  tmpstr = tmpstr.trim();
-  tmpstr = tmpstr.replace(/(^\-)|(\-$)/, ''); // тире в начале и конце
-  tmpstr = tmpstr.replace(/\s{2,}/g, ' '); // тире в начале и конце
+  str = checkPairedNames(str);
 
-  return tmpstr.trim();
+  str = str.replace(/\s+[А-ЯЁа-яё]\s+/gi, ' '); // одиночные буквы  
+  str = str.replace(/\-\s*\-/gi, ' '); // два тире разделенные пробелом
+  str = str.trim();
+  str = str.replace(/(^\-)|(\-$)/, ''); // тире в начале и конце
+  str = str.replace(/\s{2,}/g, ' '); // тире в начале и конце
+
+  return str.trim();
 }
 
 export function routeParser(body) {
