@@ -2,7 +2,7 @@
 import {routeParser} from '../clean-body-parser.js';
 import { parseRole } from '../parser.js';
 import { cleanBody } from '../clean-body-parser.js';
-import msgs from './msgs.js';
+import msgs from './test-msgs.js';
 
 describe('cleanBody func', () => {
   for (let msg of msgs) {

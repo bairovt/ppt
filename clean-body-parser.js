@@ -4,6 +4,8 @@ import points from './data/points.js'
 export function cleanBody(body) {
   let tmpstr = ' ' + body + ' ';
 
+  tmpstr = tmpstr.replace('‐', '-');
+
   let regexList = [
     /[\.,\?:!\\\/\(\)\+]|\w|\d|\n/gi,
     /здрав\S*|пр(и|е)ве(т|д)\S*|добр(ый|ое)|ч(е|и)л(о|а)век\S*|\sчел\s/gi,
