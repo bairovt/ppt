@@ -1,4 +1,4 @@
-import points from './data/points.js'
+import points from '../data/points.js'
 
 //todo: сделать проверку городов на cleanBody
 export function checkPairedNames(str) {

@@ -13,7 +13,7 @@ RETURN {Body: rec.Body, role: rec.role, Chat: rec.ChatName, Time: DATE_FORMAT(re
 FOR rec IN Recs
 FILTER rec.role != null AND rec.role != 'M' 
 //FILTER LIKE(rec.Body, '%отправ%', true)
-FILTER LENGTH(rec.route) < 2
+FILTER LENGTH(rec.route) == 1
 SORT rec.TimeStamp DESC
 RETURN {Body: rec.Body, role: rec.role, Chat: rec.ChatName, 
     Time: DATE_FORMAT(rec.TimeStamp+32400000, "%dd.%mm.%yy %hh:%ii"), TimeStamp: rec.TimeStamp }

@@ -1,4 +1,4 @@
-import { parseMsg, parseRole, parseTel, parseDirection, parseSpaceRoute } from './parser.js';
+import { parseMsg, parseRole, parseTel, parseDirection, parseSpaceRoute } from '../parser.js';
 
 const body =
   // '29.03. в районе 8-9 утра нужно одно место с Читы до Краснокаменска. Звонить на 89148026706 Срочно!';

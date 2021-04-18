@@ -1,5 +1,5 @@
 import { aql } from 'arangojs';
-import db from './lib/arangodb.js';
+import db from '../src/lib/arangodb.js';
 
 export async function findRoute(role, from, to) {
   const recs = await db
