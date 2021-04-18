@@ -1,5 +1,5 @@
-const {Telegraf} = require('telegraf');
-const arangojs = require('arangojs');
+import {Telegraf} from 'telegraf';
+// import {aql} from 'arangojs';
 
 const botToken = '1641333989:AAG1Qj7QiVLG8TPmjMVF8tnVE0C_ZUScWqQ';
 

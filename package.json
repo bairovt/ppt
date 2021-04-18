@@ -4,8 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon index.js",
-    "parser": "node index.js",
+    "bot": "node ./src/bot.js",
+    "dev": "nodemon ./src/bot.js",
+    "parser": "node ./src/fetch-parse-load.js",
     "test": "jest"
   },
   "keywords": [],
