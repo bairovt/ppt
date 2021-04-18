@@ -34,20 +34,21 @@ export function cleanBody(body) {
     /п(о|а)жалуй?ста\S*|легк\S*|авто\S*|багаж\S*|груз\S*|водител\S*/gi,
     /можно|чуть|(по)?раньше/gi,
     /тойот\S*|нис+ан\S*|хонд\S*|комфорт\S*/gi,
-    /\sс\s|\sв\s|\sво\s|\sдо\s|\sиз\s|\sи\s|\sили\s|\sпо\s|\sна\s|\sза\s|\sдля\s|\sа\s|\sбез\s|(-|\s)го\s|\sч\s/gi,
-  ];  
+    /\sили\s|\sдля\s|\sбез\s/gi,
+  ];
 
   for (let regex of regexList) {
     str = str.replace(regex, ' ');
   }
 
+  str = str.replace(/\s*\-\s*/gi, '-'); // тире, окруженное пробелами, на тире
   str = checkPairedNames(str);
+  str = str.replace(/\-/gi, ' '); // все тире на пробелы, т.к. парные назв уже обработаны
 
-  str = str.replace(/\s+[А-ЯЁа-яё]\s+/gi, ' '); // одиночные буквы  
-  str = str.replace(/\-\s*\-/gi, ' '); // два тире разделенные пробелом
+  str = str.replace(/\s\S{1,2}\s/gi, ' '); // 1-2 буквы между пробелами
   str = str.trim();
-  str = str.replace(/(^\-)|(\-$)/, ''); // тире в начале и конце
-  str = str.replace(/\s{2,}/g, ' '); // тире в начале и конце
+  str = str.replace(/(^\S{1,2}\s)|(\s\S{1,2}$)/gi, ''); // одиночные буквы между пробелами или тире
+  str = str.replace(/\s{2,}/g, ' ');
 
   return str.trim();
 }
