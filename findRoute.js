@@ -1,5 +1,3 @@
-import fs from 'fs';
-
 import { aql } from 'arangojs';
 import db from './lib/arangodb.js';
 
@@ -15,6 +13,7 @@ export async function findRoute(role, from, to) {
     FILTER b > a
     SORT rec.TimeStamp DESC
     RETURN {
+      name: rec.ClientName,
       role: rec.role, Body: rec.Body, Chat: rec.ChatName, 
       Time: DATE_FORMAT(rec.TimeStamp+32400000, "%hh:%ii %dd.%mm.%yy"),
       TimeStamp: rec.TimeStamp,
@@ -38,13 +37,3 @@ export async function findFromTo(direction) {
     .then((cursor) => cursor.all());
   return recs;
 }
-
-async function main() {
-  let res1 = await findRoute('D', 'Краснокаменск', 'Чита');
-  let res2 = await findRoute('D', 'Краснокаменск', 'Агинское');
-  let res = res1.concat(res2);
-  console.log('res ', res);
-  fs.writeFileSync('./result_recs.json', JSON.stringify(res, null, 2));
-}
-
-main();
