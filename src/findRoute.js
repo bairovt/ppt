@@ -1,7 +1,7 @@
 import { aql } from 'arangojs';
 import db from '../src/lib/arangodb.js';
 
-export async function findRoute(role, from, to) {
+export async function findRoute(role, direction = 1, from, to) {
   const recs = await db
     .query(
       aql`
@@ -10,8 +10,8 @@ export async function findRoute(role, from, to) {
     LET a = POSITION(rec.route, ${from}, true)
     LET b = POSITION(rec.route, ${to}, true)
     FILTER a != -1 AND b != -1
-    FILTER b > a
-    SORT rec.TimeStamp DESC
+    FILTER ${direction} == 1 ? b > a : true
+    SORT rec.TimeStamp ASC
     RETURN {
       name: rec.ClientName,
       role: rec.role, Body: rec.Body, Chat: rec.ChatName, 

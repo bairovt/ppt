@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "bot": "node ./src/bot.js",
-    "dev": "nodemon ./src/bot.js",
+    "devbot": "nodemon ./src/bot.js",
     "parser": "node ./src/fetch-parse-load.js",
     "test": "jest"
   },
