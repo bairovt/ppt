@@ -1,6 +1,6 @@
 import {Telegraf} from 'telegraf';
-import { routeParser } from './clean-body-parser.js';
-import { findRoute } from './findRoute.js';
+import { routeParser } from '../clean-body-parser.js';
+import { findRoute } from '../findRoute.js';
 
 const botToken = '1641333989:AAG1Qj7QiVLG8TPmjMVF8tnVE0C_ZUScWqQ';
 

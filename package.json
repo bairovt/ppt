@@ -6,7 +6,7 @@
   "scripts": {
     "bot": "node ./src/bot.js",
     "devbot": "nodemon ./src/bot.js",
-    "parser": "node ./src/fetch-parse-load.js",
+    "fetch": "node ./src/fetch-parse-load.js",
     "test": "jest"
   },
   "keywords": [],

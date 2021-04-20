@@ -1,6 +1,6 @@
 'use strict';
 
-import points from '../data/points.js';
+import points from '../../data/points.js';
 import {cleanBody, routeParser} from './clean-body-parser.js';
 
 export function parseDirection(direction, body) {

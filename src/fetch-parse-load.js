@@ -2,7 +2,7 @@ import { aql } from 'arangojs';
 import db from '../src/lib/arangodb.js';
 
 import { fetchViberDb, getStartEventId } from './fetchdb.js';
-import { parseMsg } from '../src/parser.js';
+import { parseMsg } from '../src/parse/parser.js';
 
 async function main() {
   let startTime = Date.now();
