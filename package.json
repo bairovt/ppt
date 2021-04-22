@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "bot": "node ./src/bot.js",
-    "devbot": "nodemon ./src/bot.js",
+    "bot": "node ./src/bot/bot.js",
+    "devbot": "nodemon ./src/bot/bot.js",
     "fetch": "node ./src/fetch-parse-load.js",
     "test": "jest"
   },
@@ -13,9 +13,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "arangojs": "^7.3.0",
+    "arangojs": "^7.4.0",
     "better-sqlite3": "^7.1.2",
     "config": "^3.3.6",
+    "dotenv": "^8.2.0",
     "telegraf": "^4.3.0"
   },
   "type": "module",

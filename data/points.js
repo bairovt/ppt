@@ -14,7 +14,7 @@ const points = [
   {
     _key: 'Irkutsk',
     name: 'Иркутск',
-    names: ['иркутск', 'иркутска'],
+    names: ['иркутск', 'иркутска', 'ирк'],
   },
   {
     _key: 'Aginsk',

@@ -1,38 +1,60 @@
 import {Telegraf} from 'telegraf';
-import { routeParser } from '../clean-body-parser.js';
+import { routeParser } from '../parse/clean-body-parser.js';
 import { findRoute } from '../findRoute.js';
+import { setUser, getUser, setUserRole } from '../bot/user.js';
 
 const botToken = '1641333989:AAG1Qj7QiVLG8TPmjMVF8tnVE0C_ZUScWqQ';
 
 const bot = new Telegraf(botToken); //todo^ use process.env.BOT_TOKEN
 
-const helpTxt = `- Этот бот создан для удобства поиска попутчиков.
-- Для начала установите себя в качестве водителя или пассажира, отправив сообщение:
-  для водителя:
-      возьму
-  для пассажира:
-      ищу
-Эту настройку можно изменить отправив соотв. сообщение.
+const helpTxt = `Данный бот создан для удобства поиска попутчиков.
+
+- Для начала установите себя в качестве водителя или пассажира, отправив сообщение: 
+  "возьму" для водителей,
+  "ищу" для пассажиров.
+  Эту настройку можно изменить в любое время отправив соотв. сообщение.
 
 Примеры:
-- Показать объявления по направлению между 2 населенными пунктами:
+- Поиск объявлений по направлению между 2 населенными пунктами:
     Чита Улан-Удэ
     Борзя Чита
-- Показать объявления в оба направления:
-    Чита & УУ`;
+- Поиск объявлений в оба направления:
+    Чита & УУ
+    & Забайкальск Чита
 
-bot.start((ctx) => {
+- При подаче объявлений (в группах) населенные пункты указывать последовательно движению:
+  правильно - "Ищу машину с Читы до Улан-Удэ"
+  неправильно - "Ищу машину до Улан-Удэ из Читы";
+  правильно - "Возьму пассажиров из Забайкальска, Борзи до Читы"
+  неправильно - "Возьму пассажиров из Забайкальска до Читы, попутно из Борзи";
+  Обратный маршрут указываать в отдельном сообщении.
+
+- При подаче объявления обязательно указывать номер телефона.
+
+/help - показать это сообщение`;
+
+bot.catch((err, ctx) => {
+  console.error(err);
+  ctx.reply('ошибка');
+});
+
+bot.start(async (ctx) => {
   // first time: updateType: my_chat_member;
-  // console.log(JSON.stringify(ctx.update, null, 2));  
-  console.log(ctx.update.message.from.id);  
+  console.log(JSON.stringify(ctx.update.message, null, 2));
+  let userData = ctx.update.message.from;
+  userData._key = String(ctx.update.message.from.id);
+  userData.chat_id = ctx.update.message.chat.id;
+  userData.startDate = ctx.update.message.date;
+
+  const user =  await setUser(userData);
+
+  console.log(ctx.update.message.from.id);
   ctx.reply(helpTxt)
 });
 
 bot.use(async (ctx, next) => {
-  //todo: set ctx.state.role
   console.time(`Processing update ${ctx.update.update_id}`);
-  // console.log(JSON.stringify(ctx.update, null, 2));
-  // await ctx.reply('message of updateType:\n' + ctx.updateType + '\nrecieved')
+  ctx.state.user = await getUser(String(ctx.update.message.from.id));
   await next();
   console.timeEnd(`Processing update ${ctx.update.update_id}`);
 })
@@ -41,15 +63,31 @@ bot.help((ctx) => ctx.reply(helpTxt));
 bot.hears('hi', (ctx) => ctx.reply('Hey there'));
 
 
-bot.on('text', async (ctx, next) => {
+bot.on('text', async (ctx, next) => {  
   const msgText = ctx.update.message.text;
+  if (msgText.match(/возьму/i)) {
+    await setUserRole(ctx.state.user._key, 'D');
+    ctx.reply('Вы установлены в качестве водителя. Поиск будет показывать объявления пассажиров.');
+    return next();
+  }
+  if (msgText.match(/ищу/i)) {
+    await setUserRole(ctx.state.user._key, 'P');
+    ctx.reply(
+      'Вы установлены в качестве пассажира. Поиск будет показывать объявления водителей.'
+    );
+    return next();
+  }
   const route = routeParser(msgText);
   if (route.length < 2) {    
     return ctx.reply(
       'По маршруту ' + JSON.stringify(route) + '\nничего не найдено.\nНеобходимо 2 нас. пункта'
     );
   }
-  const recs = await findRoute('D', 2, route[0], route[1]);
+  let direction = 1;
+  if (msgText.match(/&/i)) {
+    direction = 2;
+  }
+  const recs = await findRoute(ctx.state.user.role, direction, route[0], route[1]);
   let resp = '';
   for (let rec of recs) {
     resp = rec.Time + ': ' + rec.Body;
