@@ -4,30 +4,41 @@ import db from '../src/lib/arangodb.js';
 import { fetchViberDb, getStartEventId } from './fetchdb.js';
 import { parseMsg } from '../src/parse/parser.js';
 
-async function main() {
+let ECONNRESET_error_cnt = 0;
+
+async function fetchParseLoad() {
   let startTime = Date.now();
+  let msgs = [];
+  const recs = [];
+  const dupls = {
+    allCount: 0,
+    M: 0,
+  };
+  
+  const chats = await db
+    .collection('Chats')
+    .all()
+    .then((cursor) => cursor.all());
+
   try {
     let lastEventId = await db
       .query(
         aql`
-      FOR r in Recs
-        SORT r.eventId DESC
+      FOR rec in Recs
+        SORT rec.EventID DESC
         LIMIT 1
-        RETURN r.eventId
+        RETURN rec.EventID
     `
       )
       .then((cursor) => cursor.next());
     if (!lastEventId) {
       lastEventId = getStartEventId(24 * 3);
     }
-
-    const chats = await db.collection('Chats').all().then(cursor => cursor.all());
-    const msgs = fetchViberDb(chats, lastEventId, 10000);
+    
+    msgs = fetchViberDb(chats, lastEventId, 10000);
 
     const recsCollection = db.collection('Recs');
-    await recsCollection.truncate();
-
-    const recs = [];    
+    // await recsCollection.truncate();    
 
     for (let msg of msgs) {
       const rec = parseMsg(msg);
@@ -40,37 +51,73 @@ async function main() {
           if (err.code === 409 && err.errorNum === 1210) {
             let existingRec = await recsCollection.byExample({ Body: rec.Body })
               .then((cursor) => cursor.next());
-              if (existingRec.role != 'M') {
-                console.log('existingRec', {
-                  role: existingRec.role,
-                  Body: existingRec.Body,
-                  from: existingRec.from,
-                  to: existingRec.to,
-                  ChatName: existingRec.ChatName,
-                  ClientName: existingRec.ClientName,
-                  TimeStamp: existingRec.TimeStamp,
-                  cleanedBody: existingRec.cleanedBody,
-                  route: existingRec.route,
-                });
-              }
-            
+
             if (existingRec.TimeStamp < rec.TimeStamp) {
               await recsCollection.update(existingRec._id, rec);
             }
-          } else {
-            console.error('ошибка', err);
+            
+            dupls.allCount ++;
+            if (existingRec.role == 'M') {
+              dupls.M ++;
+              console.log(existingRec.Body);
+            }
+            
+            
+          } else {            
+            throw(err);
           }
         }
       }
-    }
-
-    console.log('msgs count: ' + msgs.length);
-    console.log('recs count: ' + recs.length);    
+    }   
 
   } catch (err) {
-    console.error(err);
+    // todo: log errors
+    if (err.code === 'ECONNRESET') {
+      ECONNRESET_error_cnt++;
+    } else {
+      console.error('Unhandled ошибка: ', err);
+      throw(err);
+    }
   }
-  console.log(Date.now() - startTime + ' мс');
+  console.log('new msgs count: ', msgs.length);
+  console.log('new recs count: ', recs.length);
+  console.log('existing recs count: ', dupls.allCount);
+  console.log('existing M recs count: ', dupls.allCount);
+
+  // db.close();
+  console.log('ECONNRESET_error_cnt : ', ECONNRESET_error_cnt);
+  console.log(Date.now() - startTime + ' мс\n-----');
+}
+
+function delay(sec) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, sec * 1000)
+  })
+}
+
+async function main() {
+  while (true) {
+    await fetchParseLoad();
+    await delay(60);
+  }
 }
 
 main();
+
+// Enable graceful stop
+process.once('SIGINT', () => {
+  console.log('\nSIGINT');
+  if (ECONNRESET_error_cnt) {
+    console.log('ECONNRESET_error_cnt : ', ECONNRESET_error_cnt);
+  };
+  db.close();
+  process.exit();
+})
+process.once('\nSIGTERM', () => {
+  console.log('SIGTERM');
+  if (ECONNRESET_error_cnt) {
+    console.log('ECONNRESET_error_cnt : ', ECONNRESET_error_cnt);
+  }
+  db.close();
+  process.exit();
+})

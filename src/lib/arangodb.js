@@ -2,7 +2,7 @@
 
 import config from 'config';
 
-import { Database, aql} from 'arangojs';
+import { Database} from 'arangojs';
 
 const url = config.get('db.url');
 const databaseName = config.get('db.databaseName');

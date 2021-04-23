@@ -9,7 +9,7 @@ const bot = new Telegraf(config.get('bot.token'));
 const helpTxt = `Данный бот создан для удобства поиска попутчиков.
 
 - Для начала установите себя в качестве водителя или пассажира, отправив сообщение: 
-  "возьму" для водителей,
+  "еду" для водителей,
   "ищу" для пассажиров.
   Эту настройку можно изменить в любое время отправив соотв. сообщение.
 
@@ -59,12 +59,10 @@ bot.use(async (ctx, next) => {
 })
 
 bot.help((ctx) => ctx.reply(helpTxt));
-bot.hears('hi', (ctx) => ctx.reply('Hey there'));
-
 
 bot.on('text', async (ctx, next) => {  
   const msgText = ctx.update.message.text;
-  if (msgText.match(/возьму/i)) {
+  if (msgText.match(/еду/i)) {
     await setUserRole(ctx.state.user._key, 'D');
     ctx.reply('Вы установлены в качестве водителя. Поиск будет показывать объявления пассажиров.');
     return next();
