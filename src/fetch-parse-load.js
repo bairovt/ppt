@@ -6,6 +6,8 @@ import { parseMsg } from '../src/parse/parser.js';
 
 let ECONNRESET_error_cnt = 0;
 
+const recsCollection = db.collection('Recs');
+
 async function fetchParseLoad() {
   let startTime = Date.now();
   let msgs = [];
@@ -35,14 +37,12 @@ async function fetchParseLoad() {
       lastEventId = getStartEventId(24 * 3);
     }
     
-    msgs = fetchViberDb(chats, lastEventId, 10000);
-
-    const recsCollection = db.collection('Recs');
-    // await recsCollection.truncate();    
+    msgs = fetchViberDb(chats, lastEventId, 10000);    
 
     for (let msg of msgs) {
       const rec = parseMsg(msg);
       if (rec) {
+        rec.src='viber';
         try {
           const newRec = await recsCollection.save(rec, { returnNew: true });
           recs.push(newRec);
@@ -59,7 +59,7 @@ async function fetchParseLoad() {
             dupls.allCount ++;
             if (existingRec.role == 'M') {
               dupls.M ++;
-              console.log(existingRec.Body);
+              // console.log(existingRec.Body);
             }
             
             
@@ -82,7 +82,7 @@ async function fetchParseLoad() {
   console.log('new msgs count: ', msgs.length);
   console.log('new recs count: ', recs.length);
   console.log('existing recs count: ', dupls.allCount);
-  console.log('existing M recs count: ', dupls.allCount);
+  console.log('existing M recs count: ', dupls.M);
 
   // db.close();
   console.log('ECONNRESET_error_cnt : ', ECONNRESET_error_cnt);
@@ -96,6 +96,7 @@ function delay(sec) {
 }
 
 async function main() {
+  // await recsCollection.truncate();
   while (true) {
     await fetchParseLoad();
     await delay(60);

@@ -1,3 +1,5 @@
-mtype 2 - картинки
-mtype 9 - содержит ссылки вида http
-mtype 69 - admin удалил пользователя
+Messges.Type 2 - картинки
+Messges.Type 9 - содержит ссылки вида http
+Messges.Type 69 - admin удалил пользователя
+
+

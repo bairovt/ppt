@@ -1,0 +1,19 @@
+//// Найти группы попутчиков
+
+SELEcT Body FROM Messages JOIN Events ON Messages.EventID = Events.EventID
+--WHERE "Events"."Type"=9
+--WHERE Body LIKE '%Курумкан%';
+WHERE "Messages"."Type" = 9
+AND Body LIKE '%invite.viber.com%'
+AND Body LIKE '%попут%'
+--AND Body NOTNULL
+--AND Body NOT Like '%custom-sticker-pack%'
+--AND Body NOT Like '%avito%'
+--AND Body NOT Like '%youtu.be%'
+--AND Body NOT Like '%gad-jet%'
+AND Body NOT Like '%Попутчики | Регион -75%'
+AND Body NOT Like '%ПОПУТКА  80/75/03/38%'
+AND Body NOT Like '%Попутчики 03%'
+AND Body NOT Like '%Попутчики Забайкальский край%'
+--AND Body NOT Like '%milllioner%'
+ORDER BY Events.TimeStamp DESC;

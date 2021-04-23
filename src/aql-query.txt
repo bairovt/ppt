@@ -1,4 +1,4 @@
-// поиск маршрута от А до Б
+//// поиск маршрута от А до Б
 FOR rec IN Recs
 FILTER rec.role == "D"
 //FILTER LIKE(rec.Body, '%отправ%', true)
@@ -9,7 +9,8 @@ FILTER b > a
 SORT rec.TimeStamp DESC
 RETURN {Body: rec.Body, role: rec.role, Chat: rec.ChatName, Time: DATE_FORMAT(rec.TimeStamp+32400000, "%dd.%mm.%yy %hh:%ii"), TimeStamp: rec.TimeStamp }
 
-// поиск не внесенныx нас. пунктов (rec.route < 2) (вероятность)
+
+//// поиск не внесенныx нас. пунктов (rec.route < 2) (вероятность)
 FOR rec IN Recs
 FILTER rec.role != null AND rec.role != 'M' 
 //FILTER LIKE(rec.Body, '%отправ%', true)
@@ -17,3 +18,11 @@ FILTER LENGTH(rec.route) == 1
 SORT rec.TimeStamp DESC
 RETURN {Body: rec.Body, role: rec.role, Chat: rec.ChatName, 
     Time: DATE_FORMAT(rec.TimeStamp+32400000, "%dd.%mm.%yy %hh:%ii"), TimeStamp: rec.TimeStamp }
+
+
+//// поиск по тексту Body
+FOR rec IN Recs
+//FILTER rec.role == "D"
+FILTER LIKE(rec.Body, '%89141378784%', true)
+SORT rec.TimeStamp DESC
+RETURN {Body: rec.Body, role: rec.role, Chat: rec.ChatName, Time: DATE_FORMAT(rec.TimeStamp+32400000, "%dd.%mm.%yy %hh:%ii"), TimeStamp: rec.TimeStamp }
