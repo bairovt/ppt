@@ -20,7 +20,9 @@ async function main() {
     if (!lastEventId) {
       lastEventId = getStartEventId(24 * 3);
     }
-    const msgs = fetchViberDb(lastEventId, 10000);
+
+    const chats = await db.collection('Chats').all().then(cursor => cursor.all());
+    const msgs = fetchViberDb(chats, lastEventId, 10000);
 
     const recsCollection = db.collection('Recs');
     await recsCollection.truncate();

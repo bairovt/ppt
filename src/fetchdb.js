@@ -1,5 +1,4 @@
 import config from 'config';
-
 import Database from 'better-sqlite3';
 
 const db = new Database(config.get('sqlite.dbpath'), {
@@ -8,17 +7,7 @@ const db = new Database(config.get('sqlite.dbpath'), {
   // verbose: console.log,
 });
 // todo проверка на наличие группы (на случай удаления из группы)
-const chats = [
-  { name: 'ПОПУТКА  80/75/03/38', Token: '5275694630505075174' },
-  { name: 'Попутчики Забайкальский край', Token: '5225978192916092249' },
-  { name: 'Попутчики Регион -75', Token: '5546560442281758398' },
-  { name: 'ПОПУТЧИКИ 03', Token: '5231316251132150843' },
-  { name: 'Нам по пути 03', Token: '5484337904223247158' },
-  { name: 'Хочу Уехать (для пассажиров)', Token: '5339671711383017928' },
-  { name: 'Довезу (для водителей)', Token: '5331160335736016288' },
-  { name: 'Попутка Краснокаменск-Забайк', Token: '5404692607692565943' },
-  { name: 'Забайкальск-Краснокаменск', Token: '5409395949194807791' },
-];
+
 
 export function getStartEventId(hours) {
   const now = Date.now();
@@ -34,7 +23,7 @@ export function getStartEventId(hours) {
   return res.EventID;
 }
 
-export function fetchViberDb(eventId, limit) {
+export function fetchViberDb(chats, eventId, limit) {  
   const chatTokensParams = '?,'.repeat(chats.length).slice(0, -1);
   const chatTokens = chats.map((el) => el.Token);
   const sqlStmt = db.prepare(
