@@ -2,10 +2,9 @@ import {Telegraf} from 'telegraf';
 import { routeParser } from '../parse/clean-body-parser.js';
 import { findRoute } from '../findRoute.js';
 import { setUser, getUser, setUserRole } from '../bot/user.js';
+import config from 'config';
 
-const botToken = '1641333989:AAG1Qj7QiVLG8TPmjMVF8tnVE0C_ZUScWqQ';
-
-const bot = new Telegraf(botToken); //todo^ use process.env.BOT_TOKEN
+const bot = new Telegraf(config.get('bot.token'));
 
 const helpTxt = `Данный бот создан для удобства поиска попутчиков.
 
@@ -87,7 +86,8 @@ bot.on('text', async (ctx, next) => {
   if (msgText.match(/&/i)) {
     direction = 2;
   }
-  const recs = await findRoute(ctx.state.user.role, direction, route[0], route[1]);
+  const roleToFind = ctx.state.user.role === 'D' ? 'P' : 'D';
+  const recs = await findRoute(roleToFind, direction, route[0], route[1]);
   let resp = '';
   for (let rec of recs) {
     resp = rec.Time + ': ' + rec.Body;
