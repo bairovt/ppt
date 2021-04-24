@@ -71,12 +71,13 @@ async function fetchParseLoad() {
           }
         }
       }
+      // throw new Error('bla bla err');
     }   
 
   } catch (error) {
     writeFileSync(
       path.join(root, 'log', Date.now() + '.error'),
-      errorLog(error)
+      errorLog(error, 'err2', {err3: 3, err4: 4})
     );
     throw(error);
   }
