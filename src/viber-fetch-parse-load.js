@@ -1,10 +1,13 @@
 import { aql } from 'arangojs';
-import db from '../src/lib/arangodb.js';
+import db from './lib/arangodb.js';
+import {errorLog} from './lib/error-log.js';
+import config from 'config';
+import { fetchViberDb, getStartEventId } from './viber/fetchdb.js';
+import { parseMsg } from './parse/parser.js';
+import { writeFileSync } from 'fs';
+import path from 'path';
 
-import { fetchViberDb, getStartEventId } from './fetchdb.js';
-import { parseMsg } from '../src/parse/parser.js';
-
-let ECONNRESET_error_cnt = 0;
+const root = config.get('root');
 
 const recsCollection = db.collection('Recs');
 
@@ -39,54 +42,52 @@ async function fetchParseLoad() {
     
     msgs = fetchViberDb(chats, lastEventId, 10000);    
 
+    // throw new Error();
+
     for (let msg of msgs) {
       const rec = parseMsg(msg);
       if (rec) {
-        rec.src='viber';
+        rec.src = 'viber';
         try {
           const newRec = await recsCollection.save(rec, { returnNew: true });
           recs.push(newRec);
-        } catch(err) {
+        } catch (err) {
           // unique constraint violated
           if (err.code === 409 && err.errorNum === 1210) {
-            let existingRec = await recsCollection.byExample({ Body: rec.Body })
+            let existingRec = await recsCollection
+              .byExample({ Body: rec.Body })
               .then((cursor) => cursor.next());
 
             if (existingRec.TimeStamp < rec.TimeStamp) {
               await recsCollection.update(existingRec._id, rec);
             }
-            
-            dupls.allCount ++;
+
+            dupls.allCount++;
             if (existingRec.role == 'M') {
-              dupls.M ++;
-              // console.log(existingRec.Body);
+              dupls.M++;
             }
-            
-            
-          } else {            
-            throw(err);
+          } else {
+            throw err;
           }
         }
       }
     }   
 
-  } catch (err) {
-    // todo: log errors
-    if (err.code === 'ECONNRESET') {
-      ECONNRESET_error_cnt++;
-    } else {
-      console.error('Unhandled ошибка: ', err);
-      throw(err);
-    }
+  } catch (error) {
+    writeFileSync(
+      path.join(root, 'log', Date.now() + '.error'),
+      errorLog(error)
+    );
+    throw(error);
   }
-  console.log('new msgs count: ', msgs.length);
-  console.log('new recs count: ', recs.length);
-  console.log('existing recs count: ', dupls.allCount);
-  console.log('existing M recs count: ', dupls.M);
 
-  // db.close();
-  console.log('ECONNRESET_error_cnt : ', ECONNRESET_error_cnt);
-  console.log(Date.now() - startTime + ' мс\n-----');
+  // if (process.env.NODE_ENV === 'development') {
+    console.log('new msgs count: ', msgs.length);
+    console.log('new recs count: ', recs.length);
+    console.log('existing recs count: ', dupls.allCount);
+    console.log('existing M recs count: ', dupls.M);      
+    console.log(Date.now() - startTime + ' мс\n-----');
+  // }
 }
 
 function delay(sec) {
@@ -106,19 +107,14 @@ async function main() {
 main();
 
 // Enable graceful stop
-process.once('SIGINT', () => {
-  console.log('\nSIGINT');
-  if (ECONNRESET_error_cnt) {
-    console.log('ECONNRESET_error_cnt : ', ECONNRESET_error_cnt);
-  };
+function gracefulStop(msg) {
+  console.log(msg);
   db.close();
   process.exit();
+}
+process.once('SIGINT', () => {
+  gracefulStop('\nSIGINT')
 })
 process.once('\nSIGTERM', () => {
-  console.log('SIGTERM');
-  if (ECONNRESET_error_cnt) {
-    console.log('ECONNRESET_error_cnt : ', ECONNRESET_error_cnt);
-  }
-  db.close();
-  process.exit();
+  gracefulStop('\nSIGTERM'); 
 })

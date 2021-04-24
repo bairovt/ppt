@@ -378,6 +378,11 @@ const points = [
     name: 'Баляга',
     names: ['баляга', 'баляги', 'балягу'],
   },
+  {
+    _key: 'Alxanai',
+    name: 'Алханай',
+    names: ['алханай', 'алханая', 'алхана'],
+  },
 ];
 
 export default points;
