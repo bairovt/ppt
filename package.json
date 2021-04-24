@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "bot": "node ./src/bot/bot.js",
-    "devbot": "nodemon ./src/bot/bot.js",
+    "devbot": "cross-env NODE_ENV=development nodemon ./src/bot/bot.js",
     "getviber": "node ./src/viber-fetch-parse-load.js",
     "getvk": "node ./src/vk-fetch-parse-load.js",
     "test": "jest"
@@ -26,6 +26,7 @@
   "devDependencies": {
     "@babel/preset-env": "^7.13.12",
     "babel-jest": "^26.6.3",
+    "cross-env": "^7.0.3",
     "jest": "^26.6.3"
   }
 }

@@ -21,7 +21,7 @@ async function fetchParseLoad() {
   };
   
   const chats = await db
-    .collection('Chats')
+    .collection('ViberChats')
     .all()
     .then((cursor) => cursor.all());
 
@@ -76,19 +76,19 @@ async function fetchParseLoad() {
 
   } catch (error) {
     writeFileSync(
-      path.join(root, 'log', Date.now() + '.error'),
-      errorLog(error, 'err2', {err3: 3, err4: 4})
+      path.join(root, 'log', Date.now() + '-viber-fetch.error'),
+      errorLog(error)
     );
     throw(error);
   }
 
-  // if (process.env.NODE_ENV === 'development') {
+  if (process.env.NODE_ENV === 'development') {
     console.log('new msgs count: ', msgs.length);
     console.log('new recs count: ', recs.length);
     console.log('existing recs count: ', dupls.allCount);
-    console.log('existing M recs count: ', dupls.M);      
+    console.log('existing M recs count: ', dupls.M);
     console.log(Date.now() - startTime + ' мс\n-----');
-  // }
+  }
 }
 
 function delay(sec) {

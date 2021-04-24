@@ -2,7 +2,10 @@ import {Telegraf} from 'telegraf';
 import { routeParser } from '../parse/clean-body-parser.js';
 import { findRoute } from '../findRoute.js';
 import { setUser, getUser, setUserRole } from '../bot/user.js';
+import { errorLog } from '../lib/error-log.js';
+import { writeFileSync } from 'fs';
 import config from 'config';
+import path from 'path';
 
 const bot = new Telegraf(config.get('bot.token'));
 
@@ -33,9 +36,13 @@ const helpTxt = `Данный бот создан для удобства пои
 
 /help - показать это сообщение`;
 
-bot.catch((err, ctx) => {
-  console.error(err);
+bot.catch((error, ctx) => {
   ctx.reply('ошибка');
+  writeFileSync(
+    path.join(config.get('root'), 'log', Date.now() + '-bot.error'),
+    errorLog(error, {update: ctx.update, state: ctx.state, botInfo: ctx.botInfo})
+  );
+  throw(error);
 });
 
 bot.start(async (ctx) => {
@@ -84,6 +91,7 @@ bot.on('text', async (ctx, next) => {
   let direction = 1;
   if (msgText.match(/&/i)) {
     direction = 2;
+    throw new Error('bot error', { some: 'object' });
   }
   const roleToFind = ctx.state.user.role === 'D' ? 'P' : 'D';
   const recs = await findRoute(roleToFind, direction, route[0], route[1]);
