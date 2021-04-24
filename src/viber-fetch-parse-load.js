@@ -1,11 +1,11 @@
-import { aql } from 'arangojs';
-import db from './lib/arangodb.js';
-import {errorLog} from './lib/error-log.js';
-import config from 'config';
-import { fetchViberDb, getStartEventId } from './viber/fetchdb.js';
-import { parseMsg } from './parse/parser.js';
-import { writeFileSync } from 'fs';
-import path from 'path';
+const { aql } = require('arangojs');
+const db = require('./lib/arangodb.js');
+const {errorLog} = require('./lib/error-log.js');
+const config = require('config');
+const { fetchViberDb, getStartEventId } = require('./viber/fetchdb.js');
+const { parseMsg } = require('./parse/parser.js');
+const { writeFileSync } = require('fs');
+const path = require('path');
 
 const root = config.get('root');
 

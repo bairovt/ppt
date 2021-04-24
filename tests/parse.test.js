@@ -1,7 +1,7 @@
 
-import { cleanBody, routeParser } from '../src/parse/clean-body-parser.js';
-import { parseRole } from '../src/parse/parser.js';
-import msgs from './test-msgs.js';
+const { cleanBody, routeParser } = require('../src/parse/clean-body-parser.js');
+const { parseRole } = require('../src/parse/parser.js');
+const msgs = require('./test-msgs.js');
 
 describe('cleanBody func', () => {
   for (let msg of msgs) {
@@ -33,5 +33,5 @@ describe('parseRole', () => {
   }
 });
 
-// todo test parseTel and remove tels from test-msgs
+// todo test parseTel and remove tels = require(test-msgs
 

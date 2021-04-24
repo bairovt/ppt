@@ -1,5 +1,5 @@
-import axios from 'axios';
-import parse0 from 'node-html-parser';
+const axios = require('axios');
+const parse0 = require('node-html-parser');
 
 const { parse } = parse0;
 

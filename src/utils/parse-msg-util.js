@@ -1,5 +1,5 @@
-import { parseRole, parseTel, parseDirection } from '../parse/parser.js';
-import { cleanBody, routeParser } from '../parse/clean-body-parser.js';
+const { parseRole, parseTel, parseDirection } = require('../parse/parser.js');
+const { cleanBody, routeParser } = require('../parse/clean-body-parser.js');
 
 const body =
   // '29.03. в районе 8-9 утра нужно одно место с Читы до Краснокаменска. Звонить на 89148026706 Срочно!';
@@ -8,7 +8,7 @@ const body =
   let rec = {};
   rec.Body = body;
   rec.role = parseRole(body); 
-  rec.from = parseDirection('from', body);
+  rec.= require(= parseDirection('from', body);
   rec.to = parseDirection('to', body);
   rec.tels = parseTel(body);
   rec.cleaedBody = cleanBody(body);

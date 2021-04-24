@@ -1,9 +1,9 @@
 'use strict';
 
-import points from '../../data/points.js';
-import {cleanBody, routeParser} from './clean-body-parser.js';
+const points = require('../../data/points.js');
+const {cleanBody, routeParser} = require('./clean-body-parser.js');
 
-export function parseDirection(direction, body) {
+function parseDirection(direction, body) {
   let directionRegEx = '';
   switch (direction) {
     case 'from':
@@ -25,7 +25,7 @@ export function parseDirection(direction, body) {
   return null;
 }
 
-export function parseTel(body) {
+function parseTel(body) {
   // todo tests
   let tels = [];
   const deleteSymbolsRegex = /[-\+\(\)\s]/g;
@@ -35,7 +35,7 @@ export function parseTel(body) {
   return tels === null ? null : tels.map((tel) => tel.replace(/^7/, 8));
 }
 
-export function parseRole(body) {
+function parseRole(body) {
   // todo tests
   const driverRegex = /(по)?ед(у|ем|им)|в(о|а)зь?м(у|ем|ём)|ищу\s+пас|ищу\s+попутчик|выезжа(ю|ем)|выезд|нужен\s+пас+ажир/i;
   const passRegex = /(и|е)щ(у|ю)|ище(м|т)|пас+ажир|ед(е|и|у)т|нужн.|хочу\s(у|по|вы)?ехат|отправ(лю|ить|им)|пер(е|и)дам|чел/i;
@@ -48,7 +48,7 @@ export function parseRole(body) {
   return null;
 }
 
-export function parseMsg(msg) {
+function parseMsg(msg) {
   let rec = {
     role: null,
     from: null,
@@ -75,3 +75,5 @@ export function parseMsg(msg) {
 
   return rec;
 }
+
+module.exports = { parseDirection, parseTel, parseRole, parseMsg };

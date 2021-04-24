@@ -1,11 +1,11 @@
-import {Telegraf} from 'telegraf';
-import { routeParser } from '../parse/clean-body-parser.js';
-import { findRoute } from '../findRoute.js';
-import { setUser, getUser, setUserRole } from '../bot/user.js';
-import { errorLog } from '../lib/error-log.js';
-import { writeFileSync } from 'fs';
-import config from 'config';
-import path from 'path';
+const {Telegraf} = require('telegraf');
+const { routeParser } = require('../parse/clean-body-parser.js');
+const { findRoute } = require('../findRoute.js');
+const { setUser, getUser, setUserRole } = require('../bot/user.js');
+const { errorLog } = require('../lib/error-log.js');
+const { writeFileSync } = require('fs');
+const config = require('config');
+const path = require('path');
 
 const bot = new Telegraf(config.get('bot.token'));
 

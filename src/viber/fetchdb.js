@@ -1,5 +1,5 @@
-import config from 'config';
-import Database from 'better-sqlite3';
+const config = require('config');
+const Database = require('better-sqlite3');
 
 const db = new Database(config.get('sqlite.dbpath'), {
   readonly: true,
@@ -9,7 +9,7 @@ const db = new Database(config.get('sqlite.dbpath'), {
 // todo проверка на наличие группы (на случай удаления из группы)
 
 
-export function getStartEventId(hours) {
+function getStartEventId(hours) {
   const now = Date.now();
   const startTimestamp = now - hours * 3600 * 1000;
 
@@ -23,7 +23,7 @@ export function getStartEventId(hours) {
   return res.EventID;
 }
 
-export function fetchViberDb(chats, eventId, limit) {  
+function fetchViberDb(chats, eventId, limit) {  
   const chatTokensParams = '?,'.repeat(chats.length).slice(0, -1);
   const chatTokens = chats.map((el) => el.Token);
   const sqlStmt = db.prepare(
@@ -46,3 +46,5 @@ export function fetchViberDb(chats, eventId, limit) {
   );
   return sqlStmt.all(chatTokens, { eventId, limit });
 }
+
+module.exports = { getStartEventId, fetchViberDb };

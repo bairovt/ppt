@@ -1,8 +1,8 @@
 'use strict';
 
-import config from 'config';
+const config = require('config');
 
-import { Database} from 'arangojs';
+const { Database} = require('arangojs');
 
 const url = config.get('db.url');
 const localUrl = config.get('db.localhost');
@@ -16,4 +16,4 @@ const db = new Database({
   auth: { username, password},
 });
 
-export default db;
+module.exports = db;

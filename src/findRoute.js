@@ -1,7 +1,7 @@
-import { aql } from 'arangojs';
-import db from '../src/lib/arangodb.js';
+const { aql } = require('arangojs');
+const db = require('../src/lib/arangodb.js');
 
-export async function findRoute(role, direction = 1, from, to) {
+async function findRoute(role, direction = 1, from, to) {
   const recs = await db
     .query(
       aql`
@@ -24,12 +24,12 @@ export async function findRoute(role, direction = 1, from, to) {
   return recs;
 }
 
-export async function findFromTo(direction) {
+async function findFromTo(direction) {
   const recs = await db
     .query(
       aql`
     FOR rec IN Recs
-    FILTER rec.from == ${direction.from}
+    FILTER rec.= require(== ${direction.from}
     FILTER rec.to == ${direction.to} OR IS_NULL(rec.to) 
     RETURN rec
     `
@@ -37,3 +37,5 @@ export async function findFromTo(direction) {
     .then((cursor) => cursor.all());
   return recs;
 }
+
+module.exports = { findRoute, findFromTo };

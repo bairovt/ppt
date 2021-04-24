@@ -385,4 +385,4 @@ const points = [
   },
 ];
 
-export default points;
+module.exports = points;

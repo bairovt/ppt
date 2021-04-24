@@ -1,7 +1,7 @@
-import points from '../../data/points.js'
+const points = require('../../data/points.js');
 
 //todo: сделать проверку городов на cleanBody
-export function checkPairedNames(str) {
+function checkPairedNames(str) {
   // todo: optimize this in the future
   let newStr = str;
   let pairedNamePoints = points.filter((point) => !!point.regex);
@@ -11,7 +11,7 @@ export function checkPairedNames(str) {
   return newStr;
 };
 
-export function cleanBody(body) {
+function cleanBody(body) {
   let str = ' ' + body + ' ';
 
   str = str.replace('‐', '-');
@@ -53,7 +53,7 @@ export function cleanBody(body) {
   return str.trim();
 }
 
-export function routeParser(body) {
+function routeParser(body) {
   const route = [];
   let cleanedBody = cleanBody(body);
   let words = cleanedBody.split(/\s|\-/);  
@@ -67,3 +67,5 @@ export function routeParser(body) {
   }
   return route;
 }
+
+module.exports = { checkPairedNames, cleanBody, routeParser };

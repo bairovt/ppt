@@ -1,5 +1,5 @@
-import {findRoute} from '../findRoute.js'
-import fs from 'fs';
+const {findRoute} = require('../findRoute.js'
+const fs = require('fs');
 
 async function main() {
   let res = await findRoute('D', 2, 'Агинское', 'Чита');
