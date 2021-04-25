@@ -68,7 +68,10 @@ bot.use(async (ctx, next) => {
 
 bot.help((ctx) => ctx.reply(helpTxt));
 
-bot.on('text', async (ctx, next) => {  
+bot.on('text', async (ctx, next) => {
+  if (msgText.match(/err/i)) {
+    throw(new Error('test_bot_error'));
+  }
   const msgText = ctx.update.message.text;
   if (msgText.match(/еду/i)) {
     await setUserRole(ctx.state.user._key, 'D');
@@ -91,7 +94,6 @@ bot.on('text', async (ctx, next) => {
   let direction = 1;
   if (msgText.match(/&/i)) {
     direction = 2;
-    throw new Error('bot error', { some: 'object' });
   }
   const roleToFind = ctx.state.user.role === 'D' ? 'P' : 'D';
   const recs = await findRoute(roleToFind, direction, route[0], route[1]);
