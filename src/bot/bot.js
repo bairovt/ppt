@@ -11,7 +11,7 @@ const bot = new Telegraf(config.get('bot.token'));
 
 const helpTxt = `Данный бот создан для удобства поиска попутчиков.
 
-- Для начала установите себя в качестве водителя или пассажира, отправив сообщение: 
+- Укажите свою роль: водитель или пассажир, отправив сообщение: 
   "еду" для водителей,
   "ищу" для пассажиров.
   Эту настройку можно изменить в любое время отправив соотв. сообщение.
@@ -72,19 +72,21 @@ bot.on('text', async (ctx, next) => {
   const msgText = ctx.update.message.text;
   if (msgText.match(/err/i)) {
     throw(new Error('test_bot_error'));
-  }
+  }  
   if (msgText.match(/еду/i)) {
-    await setUserRole(ctx.state.user._key, 'D');
-    ctx.reply('Вы установлены в качестве водителя. Поиск будет показывать объявления пассажиров.');
-    return next();
-  }
-  if (msgText.match(/ищу/i)) {
-    await setUserRole(ctx.state.user._key, 'P');
-    ctx.reply(
+    await setUserRole(ctx.state.user._key, 'D');    
+    return ctx.reply(
+      'Вы установлены в качестве водителя. Поиск будет показывать объявления пассажиров.'
+    );
+  } else if (msgText.match(/ищу/i)) {
+    await setUserRole(ctx.state.user._key, 'P');    
+    return ctx.reply(
       'Вы установлены в качестве пассажира. Поиск будет показывать объявления водителей.'
     );
-    return next();
+  } else if (!ctx.state.user.role) {
+    return ctx.reply('Укажите свою роль: \n"ищу" - для пассажиров, \n"еду" - для водителей');
   }
+
   const route = routeParser(msgText);
   if (route.length < 2) {    
     return ctx.reply(
@@ -99,7 +101,7 @@ bot.on('text', async (ctx, next) => {
   const recs = await findRoute(roleToFind, direction, route[0], route[1]);
   let resp = '';
   for (let rec of recs) {
-    resp = rec.Time + ': ' + rec.Body;
+    resp = rec.Time + ' | ' + rec.Body;
     await ctx.telegram.sendMessage(ctx.message.chat.id, resp); // ctx.reply();
   }
   return next();

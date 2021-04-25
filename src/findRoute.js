@@ -15,7 +15,7 @@ async function findRoute(role, direction = 1, from, to) {
     RETURN {
       name: rec.ClientName,
       role: rec.role, Body: rec.Body, Chat: rec.ChatName, 
-      Time: DATE_FORMAT(rec.TimeStamp+32400000, "%dd.%mm.%yy %hh:%ii"),
+      Time: DATE_FORMAT(rec.TimeStamp+32400000, "%dd.%mm/%hh:%ii"),
       TimeStamp: rec.TimeStamp,
       route: rec.route
     }`

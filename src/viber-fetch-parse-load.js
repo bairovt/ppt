@@ -91,7 +91,7 @@ async function fetchParseLoad() {
   }
 }
 
-function delay(sec) {
+function delaySec(sec) {
   return new Promise((resolve) => {
     setTimeout(resolve, sec * 1000)
   })
@@ -101,7 +101,7 @@ async function main() {
   // await recsCollection.truncate();
   while (true) {
     await fetchParseLoad();
-    await delay(60);
+    await delaySec(10);
   }
 }
 
