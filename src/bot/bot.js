@@ -69,10 +69,10 @@ bot.use(async (ctx, next) => {
 bot.help((ctx) => ctx.reply(helpTxt));
 
 bot.on('text', async (ctx, next) => {
+  const msgText = ctx.update.message.text;
   if (msgText.match(/err/i)) {
     throw(new Error('test_bot_error'));
   }
-  const msgText = ctx.update.message.text;
   if (msgText.match(/еду/i)) {
     await setUserRole(ctx.state.user._key, 'D');
     ctx.reply('Вы установлены в качестве водителя. Поиск будет показывать объявления пассажиров.');
