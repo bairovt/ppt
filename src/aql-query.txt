@@ -26,3 +26,10 @@ FOR rec IN Recs
 FILTER LIKE(rec.Body, '%89141378784%', true)
 SORT rec.TimeStamp DESC
 RETURN {Body: rec.Body, role: rec.role, Chat: rec.ChatName, Time: DATE_FORMAT(rec.TimeStamp+32400000, "%dd.%mm.%yy %hh:%ii"), TimeStamp: rec.TimeStamp }
+
+
+//// show last recs
+FOR rec IN Recs
+SORT rec.TimeStamp DESC
+LIMIT 50
+RETURN {time: DATE_FORMAT(rec.TimeStamp+32400000, "%dd.%mm/%hh:%ii"), chat: rec.ChatName, body: rec.Body}
