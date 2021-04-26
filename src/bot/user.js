@@ -1,5 +1,4 @@
 const {aql} = require('arangojs');
-// const db = require('../lib/arangodb.js)');
 const db = require('../lib/arangodb.js');
 
 const usersColl = db.collection('Users');

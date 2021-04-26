@@ -85,13 +85,11 @@ bot.on('text', async (ctx, next) => {
   if (msgText.match(/еду/i)) {
     await setUserRole(user._key, 'D');    
     return ctx.reply(
-      'Вы установлены в качестве водителя. Поиск будет показывать объявления пассажиров.'
+      'Вы - водитель, поиск показывает объявления пассажиров.'
     );
   } else if (msgText.match(/ищу/i)) {
     await setUserRole(user._key, 'P');    
-    return ctx.reply(
-      'Вы установлены в качестве пассажира. Поиск будет показывать объявления водителей.'
-    );
+    return ctx.reply('Вы - пассажир, поиск показывает объявления водителей.');
   } else if (!user.role) {
     return ctx.reply(
       'Укажите свою роль: \n"ищу" - для пассажиров, \n"еду" - для водителей',
