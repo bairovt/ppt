@@ -1,7 +1,7 @@
-const {Telegraf} = require('telegraf');
+const { Telegraf, Markup } = require('telegraf');
 const { routeParser } = require('../parse/clean-body-parser.js');
 const { findRoute } = require('../findRoute.js');
-const { setUser, getUser, setUserRole } = require('../bot/user.js');
+const { setUser, getUser, setUserRole, logToDb } = require('../bot/user.js');
 const { errorLog } = require('../lib/error-log.js');
 const { writeFileSync } = require('fs');
 const config = require('config');
@@ -9,15 +9,14 @@ const path = require('path');
 
 const bot = new Telegraf(config.get('bot.token'));
 
-const helpTxt = `Данный бот создан для удобства поиска попутчиков.
-
-- Укажите свою роль: водитель или пассажир, отправив сообщение: 
+const helpTxt = `
+- Укажите свою роль: водитель или пассажир: 
   "еду" для водителей,
   "ищу" для пассажиров.
-  Эту настройку можно изменить в любое время отправив соотв. сообщение.
+  Эту настройку можно изменить в любое время.
 
 Примеры:
-- Поиск объявлений по направлению между 2 населенными пунктами:
+- Поиск объявлений по направлению:
     Чита Улан-Удэ
     Борзя Чита
 - Поиск объявлений в оба направления:
@@ -32,9 +31,13 @@ const helpTxt = `Данный бот создан для удобства пои
   Обратный маршрут указываать в отдельном сообщении.
 
 - При подаче объявления обязательно указывать номер телефона.
-- Не вносить предоплату - мошенники.
+- Внимательно смотрите на дату/время, уточняйте маршрут.
 
 /help - показать это сообщение`;
+
+const setRoleMarkup = Markup.keyboard([['Еду', 'Ищу машину']])
+  .oneTime()
+  .resize();
 
 bot.catch((error, ctx) => {
   ctx.reply('ошибка');
@@ -47,17 +50,22 @@ bot.catch((error, ctx) => {
 
 bot.start(async (ctx) => {
   // first time: updateType: my_chat_member;
-  console.log(JSON.stringify(ctx.update.message, null, 2));
   let userData = ctx.update.message.from;
   userData._key = String(ctx.update.message.from.id);
   userData.chat_id = ctx.update.message.chat.id;
   userData.startDate = ctx.update.message.date;
+  await setUser(userData);
 
-  const user =  await setUser(userData);
-
-  console.log(ctx.update.message.from.id);
-  ctx.reply(helpTxt)
+  // ctx.reply(helpTxt)
+  ctx.reply(
+    helpTxt,
+    setRoleMarkup
+  );
 });
+
+bot.command('menu', (ctx) => {
+
+})
 
 bot.use(async (ctx, next) => {
   console.time(`Processing update ${ctx.update.update_id}`);
@@ -69,22 +77,26 @@ bot.use(async (ctx, next) => {
 bot.help((ctx) => ctx.reply(helpTxt));
 
 bot.on('text', async (ctx, next) => {
+  const user = ctx.state.user;
   const msgText = ctx.update.message.text;
   if (msgText.match(/err/i)) {
     throw(new Error('test_bot_error'));
   }  
   if (msgText.match(/еду/i)) {
-    await setUserRole(ctx.state.user._key, 'D');    
+    await setUserRole(user._key, 'D');    
     return ctx.reply(
       'Вы установлены в качестве водителя. Поиск будет показывать объявления пассажиров.'
     );
   } else if (msgText.match(/ищу/i)) {
-    await setUserRole(ctx.state.user._key, 'P');    
+    await setUserRole(user._key, 'P');    
     return ctx.reply(
       'Вы установлены в качестве пассажира. Поиск будет показывать объявления водителей.'
     );
-  } else if (!ctx.state.user.role) {
-    return ctx.reply('Укажите свою роль: \n"ищу" - для пассажиров, \n"еду" - для водителей');
+  } else if (!user.role) {
+    return ctx.reply(
+      'Укажите свою роль: \n"ищу" - для пассажиров, \n"еду" - для водителей',
+      setRoleMarkup
+    );
   }
 
   const route = routeParser(msgText);
@@ -97,13 +109,22 @@ bot.on('text', async (ctx, next) => {
   if (msgText.match(/&/i)) {
     direction = 2;
   }
-  const roleToFind = ctx.state.user.role === 'D' ? 'P' : 'D';
+  const roleToFind = user.role === 'D' ? 'P' : 'D';
   const recs = await findRoute(roleToFind, direction, route[0], route[1]);
   let resp = '';
   for (let rec of recs) {
     resp = rec.Time + ' | ' + rec.Body;
     await ctx.telegram.sendMessage(ctx.message.chat.id, resp); // ctx.reply();
   }
+  const logData = {
+    user: {
+      _key: user._key,
+      name: user.first_name,
+      username: user.username      
+    },
+    msgText: msgText,
+  };
+  await logToDb(logData);
   return next();
 });
 

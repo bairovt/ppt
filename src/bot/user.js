@@ -3,6 +3,7 @@ const {aql} = require('arangojs');
 const db = require('../lib/arangodb.js');
 
 const usersColl = db.collection('Users');
+const logsColl = db.collection('Logs');
 
 async function setUser(userData) {  
   const user = await usersColl.save(userData, { returnNew: true, overwriteMode: 'update' });
@@ -20,4 +21,8 @@ async function setUserRole(user_key, role) {
   // return user;
 }
 
-module.exports = { setUser, getUser, setUserRole };
+async function logToDb(data) {
+  const log = await logsColl.save(data);  
+}
+
+module.exports = { setUser, getUser, setUserRole, logToDb };
