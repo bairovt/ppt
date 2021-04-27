@@ -1,12 +1,16 @@
 const { aql } = require('arangojs');
+const config = require('config');
 const db = require('../src/lib/arangodb.js');
+
+const minTime = Date.now() - 2*24*3600*1000; // days
 
 async function findRoute(role, direction = 1, from, to) {
   const recs = await db
     .query(
       aql`
-    FOR rec IN Recs
-    FILTER rec.role == ${role}
+    FOR rec IN Recs    
+    FILTER rec.TimeStamp > ${minTime}
+    FILTER rec.role == ${role}    
     LET a = POSITION(rec.route, ${from}, true)
     LET b = POSITION(rec.route, ${to}, true)
     FILTER a != -1 AND b != -1
@@ -17,7 +21,8 @@ async function findRoute(role, direction = 1, from, to) {
       role: rec.role, Body: rec.Body, Chat: rec.ChatName, 
       Time: DATE_FORMAT(rec.TimeStamp+32400000, "%dd.%mm/%hh:%ii"),
       TimeStamp: rec.TimeStamp,
-      route: rec.route
+      route: rec.route,
+      ChatName: rec.ChatName
     }`
     )
     .then((cursor) => cursor.all());
