@@ -6,9 +6,10 @@
   "scripts": {
     "bot": "node ./src/bot/bot.js",
     "devbot": "cross-env NODE_ENV=development nodemon ./src/bot/bot.js",
-    "getviber": "node ./src/viber-fetch-parse-load.js",
-    "getvk": "node ./src/vk-fetch-parse-load.js",
-    "test": "jest"
+    "viber": "node ./src/viber-fetch-parse-load.js",
+    "vk": "node ./src/vk-fetch-parse-load.js",
+    "test": "jest",
+    "cbu": "node ./src/utils/clean-body-util.js"
   },
   "keywords": [],
   "author": "",

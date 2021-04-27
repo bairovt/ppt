@@ -6,7 +6,7 @@ function checkPairedNames(str) {
   let newStr = str;
   let pairedNamePoints = points.filter((point) => !!point.regex);
   for (let point of pairedNamePoints) {
-    newStr = newStr.replace(point.regex, point.names[0])
+    newStr = newStr.replace(point.regex, ' ' + point.names[0] + ' ')
   }
   return newStr;
 };

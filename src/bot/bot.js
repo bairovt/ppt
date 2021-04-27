@@ -98,31 +98,42 @@ bot.on('text', async (ctx, next) => {
   }
 
   const route = routeParser(msgText);
-  if (route.length < 2) {    
-    return ctx.reply(
+  if (route.length < 2) {
+    ctx.reply(
       'По маршруту ' + JSON.stringify(route) + '\nничего не найдено.\nНеобходимо 2 нас. пункта'
     );
+  } else {
+    let direction = 1;
+    if (msgText.match(/&/i)) {
+      direction = 2;
+    }
+    const roleToFind = user.role === 'D' ? 'P' : 'D';
+    const recs = await findRoute(roleToFind, direction, route[0], route[1]);
+    let resp = '';
+    if (recs.length === 0) {
+      ctx.reply('не найдено')
+    } else {
+      for (let rec of recs) {
+        resp = rec.Time + ' | ' + rec.Body;
+        await ctx.telegram.sendMessage(ctx.message.chat.id, resp); // ctx.reply();
+      }
+    }
   }
-  let direction = 1;
-  if (msgText.match(/&/i)) {
-    direction = 2;
-  }
-  const roleToFind = user.role === 'D' ? 'P' : 'D';
-  const recs = await findRoute(roleToFind, direction, route[0], route[1]);
-  let resp = '';
-  for (let rec of recs) {
-    resp = rec.Time + ' | ' + rec.Body;
-    await ctx.telegram.sendMessage(ctx.message.chat.id, resp); // ctx.reply();
-  }
+
   const logData = {
     user: {
       _key: user._key,
       name: user.first_name,
-      username: user.username      
+      username: user.username,
+      approle: user.approle
     },
+    ts: Date.now(),
+    time: new Date(),
     msgText: msgText,
-  };
+    route
+  };  
   await logToDb(logData);
+  
   return next();
 });
 
@@ -130,10 +141,6 @@ bot.on('text', async (ctx, next) => {
 //   ctx.reply(`on message`);
 // });
 
-// bot.on('edited_message', ctx => ctx.reply('inside on edited_message\n' + ctx.update.edited_message.text));
-
 bot.launch();
-
-// Enable graceful stop
 process.once('SIGINT', () => bot.stop('SIGINT'))
 process.once('SIGTERM', () => bot.stop('SIGTERM'))
