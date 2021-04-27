@@ -115,6 +115,7 @@ bot.on('text', async (ctx, next) => {
     } else {
       for (let rec of recs) {
         resp = rec.Time + ' | ' + rec.Body;
+        if (user.approle === 'admin') resp = `${rec.src}: ${rec.ChatName}\n` + resp;
         await ctx.telegram.sendMessage(ctx.message.chat.id, resp); // ctx.reply();
       }
     }
