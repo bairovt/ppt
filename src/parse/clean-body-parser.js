@@ -14,7 +14,7 @@ function checkPairedNames(str) {
 function cleanBody(body) {
   let str = ' ' + body + ' ';
 
-  str = str.replace('‐', '-');
+  str = str.replace(/‐|—/g, '-');
 
   let regexList = [
     /[\.,\?？:!\\\/\(\)\+]|\w|\d|\n/gi,
