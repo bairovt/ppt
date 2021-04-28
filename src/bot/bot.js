@@ -69,7 +69,7 @@ bot.use(async (ctx, next) => {
   console.timeEnd(`Processing update ${ctx.update.update_id}`);
 })
 
-bot.command('stats', async (ctx) => {
+bot.command('st', async (ctx) => {
   if (ctx.state.user.approle !== 'admin') {
     return ctx.reply('forbidden');
   } else {

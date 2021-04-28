@@ -17,7 +17,14 @@ async function getStats(ctx) {
 
   const usersCnt = await db.query(aql`RETURN LENGTH(Users)`).then((cursor) => cursor.next());
   const recsCnt = await db.query(aql`RETURN LENGTH(Recs)`).then((cursor) => cursor.next());
-  const logsCnt = await db.query(aql`RETURN LENGTH(Logs)`).then((cursor) => cursor.next());
+  const logsCnt = await db
+    .query(
+      aql`FOR log IN Logs
+      FILTER log.user.approle != 'admin'
+      COLLECT WITH COUNT INTO len
+      RETURN len`
+    )
+    .then((cursor) => cursor.next());
 
   const recsCnt2 = await db
     .query(
