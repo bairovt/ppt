@@ -6,36 +6,34 @@ const { errorLog } = require('../lib/error-log.js');
 const { writeFileSync } = require('fs');
 const config = require('config');
 const path = require('path');
+const { getStats } = require('./funcs/get-stats.js');
 
 const bot = new Telegraf(config.get('bot.token'));
 
 const helpTxt = `
-- Укажите свою роль: водитель или пассажир: 
-  "еду" для водителей,
-  "ищу" для пассажиров.
-  Эту настройку можно изменить в любое время.
+Примеры поиска объявлений:
 
-Примеры:
-- Поиск объявлений по направлению:
-    Чита Улан-Удэ
-    Борзя Чита
-- Поиск объявлений в оба направления:
-    Чита & УУ
-    & Забайкальск Чита
+✅ Найти по направлению:
+  Чита Улан-Удэ
+  Забайкальск Чита
 
-- При подаче объявлений (в группах) населенные пункты указывать последовательно движению:
+✅ Найти в оба направления:
+  Чита & УУ
+  & Збк Чита
+
+❗️ При подаче объявлений (в группах) населенные пункты указывать последовательно движению:
   правильно - "Ищу машину с Читы до Улан-Удэ"
   неправильно - "Ищу машину до Улан-Удэ из Читы";
   правильно - "Возьму пассажиров из Забайкальска, Борзи до Читы"
   неправильно - "Возьму пассажиров из Забайкальска до Читы, попутно из Борзи";
   Обратный маршрут указываать в отдельном сообщении.
 
-- При подаче объявления обязательно указывать номер телефона.
-- Внимательно смотрите на дату/время, уточняйте маршрут.
+❗️ Обязательно указывать номер телефона.
+   Внимательно смотрите на дату/время, уточняйте маршрут.
 
 /help - показать это сообщение`;
 
-const setRoleMarkup = Markup.keyboard([['Еду', 'Ищу машину']])
+const setRoleMarkup = Markup.keyboard([['Ищу машину', 'Еду/Везу']])
   .oneTime()
   .resize();
 
@@ -63,16 +61,22 @@ bot.start(async (ctx) => {
   );
 });
 
-bot.command('menu', (ctx) => {
-
-})
-
+// set user mw
 bot.use(async (ctx, next) => {
   console.time(`Processing update ${ctx.update.update_id}`);
   ctx.state.user = await getUser(String(ctx.update.message.from.id));
   await next();
   console.timeEnd(`Processing update ${ctx.update.update_id}`);
 })
+
+bot.command('stats', async (ctx) => {
+  if (ctx.state.user.approle !== 'admin') {
+    return ctx.reply('forbidden');
+  } else {
+    const stats = await getStats(ctx);
+    return ctx.reply(JSON.stringify(stats, null, 2));
+  }
+});
 
 bot.help((ctx) => ctx.reply(helpTxt));
 
@@ -85,14 +89,14 @@ bot.on('text', async (ctx, next) => {
   if (msgText.match(/еду/i)) {
     await setUserRole(user._key, 'D');    
     return ctx.reply(
-      'Вы - водитель, поиск показывает объявления пассажиров.'
+      'Вы - водитель, поиск будет показывать объявления пассажиров.'
     );
   } else if (msgText.match(/ищу/i)) {
     await setUserRole(user._key, 'P');    
-    return ctx.reply('Вы - пассажир, поиск показывает объявления водителей.');
+    return ctx.reply('Вы - пассажир, поиск будет показывать объявления водителей.');
   } else if (!user.role) {
     return ctx.reply(
-      'Укажите свою роль: \n"ищу" - для пассажиров, \n"еду" - для водителей',
+      'Укажите свою роль: \n"Ищу машину" - для пассажиров, \n"Еду" - для водителей',
       setRoleMarkup
     );
   }
