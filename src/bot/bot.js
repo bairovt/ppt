@@ -33,15 +33,20 @@ const helpTxt = `
 
 /help - показать это сообщение`;
 
-const setRoleMarkup = Markup.keyboard([['Ищу машину', 'Еду/Везу']])
-  .oneTime()
+const mainMenuKb = Markup.keyboard([['Меню']])  
   .resize();
 
+   
+const setRoleKb = Markup.inlineKeyboard([
+  Markup.button.callback('Ищу машину', 'i_am_passenger'),
+  Markup.button.callback('Еду-возьму', 'i_am_driver'),
+]);
+
 bot.catch((error, ctx) => {
-  ctx.reply('ошибка');
+  ctx.reply('ошибка!');
   writeFileSync(
     path.join(config.get('root'), 'log', Date.now() + '-bot.error'),
-    errorLog(error, {update: ctx.update, state: ctx.state, botInfo: ctx.botInfo})
+    errorLog(error, {update: ctx.update, state: ctx.state, botInfo: ctx.botInfo}, ctx)
   );
   throw(error);
 });
@@ -55,18 +60,16 @@ bot.start(async (ctx) => {
   await setUser(userData);
 
   // ctx.reply(helpTxt)
-  ctx.reply(
-    helpTxt,
-    setRoleMarkup
-  );
+  ctx.reply(helpTxt, setRoleKb, mainMenuKb);
 });
 
 // set user mw
 bot.use(async (ctx, next) => {
   console.time(`Processing update ${ctx.update.update_id}`);
-  ctx.state.user = await getUser(String(ctx.update.message.from.id));
+  ctx.state.user = await getUser(ctx);
   await next();
   console.timeEnd(`Processing update ${ctx.update.update_id}`);
+  // if (process.env.NODE_ENV === 'development') console.log('ctx: ', ctx);
 })
 
 bot.command('st', async (ctx) => {
@@ -97,7 +100,7 @@ bot.on('text', async (ctx, next) => {
   } else if (!user.role) {
     return ctx.reply(
       'Укажите свою роль: \n"Ищу машину" - для пассажиров, \n"Еду" - для водителей',
-      setRoleMarkup
+      setRoleKb
     );
   }
 
@@ -135,7 +138,7 @@ bot.on('text', async (ctx, next) => {
     ts: Date.now(),
     time: new Date(),
     msgText: msgText,
-    route
+    route    
   };  
   await logToDb(logData);
   
