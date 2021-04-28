@@ -7,30 +7,10 @@ const { writeFileSync } = require('fs');
 const config = require('config');
 const path = require('path');
 const { getStats } = require('./funcs/get-stats.js');
+const { helpTxt, setRoleTxt, howToSearchTxt } = require('./texts.js');
+const { menuBtnKb, setRoleKbi, menuItemsKbi } = require('./keyboards.js');
 
 const bot = new Telegraf(config.get('bot.token'));
-
-const {helpTxt} = require('./texts.js');
-
-const mainMenuKb = Markup.keyboard([['Меню']])  
-  .resize();
-
-   
-const setRoleIKb = Markup.inlineKeyboard([
-  Markup.button.callback('Ищу машину', 'i_am_passenger'),
-  Markup.button.callback('Еду-возьму', 'i_am_driver'),
-], {columns: 2});
-
-bot.action('i_am_passenger', async (ctx) => {
-  await ctx.answerCbQuery();
-  ctx.reply(helpTxt);
-});
-
-bot.action('i_am_driver', async (ctx, next) => {
-  await ctx.answerCbQuery();
-  ctx.reply(helpTxt);
-
-});
 
 bot.catch((error, ctx) => {
   ctx.reply('ошибка!');
@@ -47,20 +27,23 @@ bot.start(async (ctx) => {
   userData._key = String(ctx.update.message.from.id);
   userData.chat_id = ctx.update.message.chat.id;
   userData.startDate = ctx.update.message.date;
-  await setUser(userData);
-
-  // ctx.reply(helpTxt)
-  ctx.reply(helpTxt, setRoleIKb, mainMenuKb);
+  await setUser(userData);  
+  ctx.reply('меню', menuBtnKb.resize());
+  ctx.reply(setRoleTxt, setRoleKbi.resize());
 });
 
 // set user mw
 bot.use(async (ctx, next) => {
-  console.time(`Processing update ${ctx.update.update_id}`);
+  // console.time(`Processing update ${ctx.update.update_id}`);
   ctx.state.user = await getUser(ctx);
   await next();
-  console.timeEnd(`Processing update ${ctx.update.update_id}`);
+  // console.timeEnd(`Processing update ${ctx.update.update_id}`);
   // if (process.env.NODE_ENV === 'development') console.log('ctx: ', ctx);
 })
+
+bot.command('menu', async (ctx) => { 
+  ctx.reply('меню', menuItemsKbi.resize());
+});
 
 bot.command('st', async (ctx) => {
   if (ctx.state.user.approle !== 'admin') {
@@ -73,35 +56,32 @@ bot.command('st', async (ctx) => {
 
 bot.help((ctx) => ctx.reply(helpTxt));
 
+bot.on('text', async (ctx, next) => {  
+  const text = ctx.update.message.text;  
+  if (text.match(/err/i)) {
+    throw new Error('test_bot_error');
+  }
+  if (text.match(/меню/i)) {
+    return ctx.reply('меню', menuItemsKbi.resize());
+  }
+  if (!ctx.state.user.role) {
+    return ctx.reply(setRoleTxt, setRoleKbi);
+  }
+  await next();
+});
+
 bot.on('text', async (ctx, next) => {
   const user = ctx.state.user;
-  const msgText = ctx.update.message.text;
-  if (msgText.match(/err/i)) {
-    throw(new Error('test_bot_error'));
-  }  
-  if (msgText.match(/еду/i)) {
-    await setUserRole(user._key, 'D');    
-    return ctx.reply(
-      'Вы - водитель, поиск будет показывать объявления пассажиров.'
-    );
-  } else if (msgText.match(/ищу/i)) {
-    await setUserRole(user._key, 'P');    
-    return ctx.reply('Вы - пассажир, поиск будет показывать объявления водителей.');
-  } else if (!user.role) {
-    return ctx.reply(
-      'Укажите свою роль: \n"Ищу машину" - для пассажиров, \n"Еду" - для водителей',
-      setRoleIKb
-    );
-  }
+  const text = ctx.update.message.text;
 
-  const route = routeParser(msgText);
+  const route = routeParser(text);
   if (route.length < 2) {
     ctx.reply(
       'По маршруту ' + JSON.stringify(route) + '\nничего не найдено.\nНеобходимо 2 нас. пункта'
     );
   } else {
     let direction = 1;
-    if (msgText.match(/&/i)) {
+    if (text.match(/&/i)) {
       direction = 2;
     }
     const roleToFind = user.role === 'D' ? 'P' : 'D';
@@ -127,12 +107,36 @@ bot.on('text', async (ctx, next) => {
     },
     ts: Date.now(),
     time: new Date(),
-    msgText: msgText,
+    text: text,
     route    
   };  
   await logToDb(logData);
   
   return next();
+});
+
+bot.action('i_am_passenger', async (ctx) => {
+  await ctx.answerCbQuery();
+  await setUserRole(ctx.state.user._key, 'P');
+  ctx.reply('Вы - пассажир, поиск будет показывать объявления водителей');
+  ctx.reply(howToSearchTxt);
+});
+
+bot.action('i_am_driver', async (ctx, next) => {
+  await ctx.answerCbQuery();
+  await setUserRole(ctx.state.user._key, 'D');
+  ctx.reply('Вы - водитель, поиск будет показывать объявления пассажиров');
+  ctx.reply(howToSearchTxt);
+});
+
+bot.action('role', async (ctx, next) => {
+  await ctx.answerCbQuery();  
+  ctx.reply(setRoleTxt, setRoleKbi.resize());
+});
+
+bot.action('help', async (ctx, next) => {
+  await ctx.answerCbQuery();  
+  ctx.reply(helpTxt);
 });
 
 // bot.on('message', async (ctx) => {
