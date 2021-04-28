@@ -10,37 +10,27 @@ const { getStats } = require('./funcs/get-stats.js');
 
 const bot = new Telegraf(config.get('bot.token'));
 
-const helpTxt = `
-Примеры поиска объявлений:
-
-✅ Найти по направлению:
-  Чита Улан-Удэ
-  Забайкальск Чита
-
-✅ Найти в оба направления:
-  Чита & УУ
-  & Збк Чита
-
-❗️ При подаче объявлений (в группах) населенные пункты указывать последовательно движению:
-  правильно - "Ищу машину с Читы до Улан-Удэ"
-  неправильно - "Ищу машину до Улан-Удэ из Читы";
-  правильно - "Возьму пассажиров из Забайкальска, Борзи до Читы"
-  неправильно - "Возьму пассажиров из Забайкальска до Читы, попутно из Борзи";
-  Обратный маршрут указываать в отдельном сообщении.
-
-❗️ Обязательно указывать номер телефона.
-   Внимательно смотрите на дату/время, уточняйте маршрут.
-
-/help - показать это сообщение`;
+const {helpTxt} = require('./texts.js');
 
 const mainMenuKb = Markup.keyboard([['Меню']])  
   .resize();
 
    
-const setRoleKb = Markup.inlineKeyboard([
+const setRoleIKb = Markup.inlineKeyboard([
   Markup.button.callback('Ищу машину', 'i_am_passenger'),
   Markup.button.callback('Еду-возьму', 'i_am_driver'),
-]);
+], {columns: 2});
+
+bot.action('i_am_passenger', async (ctx) => {
+  await ctx.answerCbQuery();
+  ctx.reply(helpTxt);
+});
+
+bot.action('i_am_driver', async (ctx, next) => {
+  await ctx.answerCbQuery();
+  ctx.reply(helpTxt);
+
+});
 
 bot.catch((error, ctx) => {
   ctx.reply('ошибка!');
@@ -60,7 +50,7 @@ bot.start(async (ctx) => {
   await setUser(userData);
 
   // ctx.reply(helpTxt)
-  ctx.reply(helpTxt, setRoleKb, mainMenuKb);
+  ctx.reply(helpTxt, setRoleIKb, mainMenuKb);
 });
 
 // set user mw
@@ -100,7 +90,7 @@ bot.on('text', async (ctx, next) => {
   } else if (!user.role) {
     return ctx.reply(
       'Укажите свою роль: \n"Ищу машину" - для пассажиров, \n"Еду" - для водителей',
-      setRoleKb
+      setRoleIKb
     );
   }
 

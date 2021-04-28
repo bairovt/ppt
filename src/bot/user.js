@@ -9,27 +9,19 @@ async function setUser(userData) {
   return user;
 }
 
-async function getUser(ctx) {
-  let user_key = '';      
-  const updateTypes = ['message', 'callback_query', 'edited_message', 'my_chat_member'];
-  for (let updateType of updateTypes) {
-    if (ctx.update[updateType]) {
-      user_key = String(ctx.update[updateType].from.id);
-      break;
-    }
-  }
+async function getUser(ctx) {  
+  let user_key = ctx.from.id;
   if (user_key) {
+    user_key = String(user_key);
     const user = await usersColl.document(user_key);
     return user;
   } else {
-    throw(new Error('myerr: getUser - update type - from.id'));  
+    throw(new Error('myerr: getUser - empty - from.id'));
   }
 }
 
-
 async function setUserRole(user_key, role) {  
-  const user = await usersColl.update(user_key, { role });
-  // return user;
+  await usersColl.update(user_key, { role });  
 }
 
 async function logToDb(data) {
