@@ -389,6 +389,12 @@ const points = [
     names: ['челябинск'],
     regex: /челяб\S*/gi,
   },
+  {
+    _key: 'Orlovsk',
+    name: 'Орловск',
+    names: ['орловск'],
+    regex: /орловск\S*/gi,
+  },
 ];
 
 module.exports = points;

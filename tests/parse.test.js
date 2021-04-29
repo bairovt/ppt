@@ -15,7 +15,7 @@ describe('cleanBody func', () => {
 
 describe('routeParser', ()=> {
   for (let msg of msgs) {
-    if (!msg.skip) {
+    if (!msg.skip && msg.route) {
       test(msg.body, () => {
         expect(routeParser(msg.body)).toEqual(msg.route);
       });

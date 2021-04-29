@@ -50,12 +50,13 @@ function telParser(body) {
 }
 
 function cargoParser(body) {
-  const cargoRegex = /груз/i;
+  const cargoRegex = /груз|будка|фургон/i; // увезти ?
   return cargoRegex.test(body);
 }
 
 function roleParser(body) {  
-  const minibusRegex = /расписани/i;
+  const minibusRegex = /расписани|ежедневн|каждый\s+день|автокас|отправление|маршрут\s+(550|527|523|750)/i;
+
   const driverRegex = /(по)?ед(у|ем|им)|в(о|а)зь?м(у|ем|ём)|ищу\s+пас|ищу\s+попутчик|выезжа(ю|ем)|выезд|нужен\s+пас+ажир/i;
   const passengerRegex = /(и|е)щ(у|ю)|ище(м|т)|пас+ажир|ед(е|и|у)т|нужн.|хочу\s(у|по|вы)?ехат|отправ(лю|ить|им)|пер(е|и)дам|чел/i;
   if (minibusRegex.test(body)) return 'M';
