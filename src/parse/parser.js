@@ -35,17 +35,19 @@ function parseTel(body) {
   return tels === null ? null : tels.map((tel) => tel.replace(/^7/, 8));
 }
 
-function parseRole(body) {
-  // todo tests
-  if (body.match(/уеду/i)) return 'P';
+function parseRole(body) {  
+  const minibusRegex = /расписани/i;
   const driverRegex = /(по)?ед(у|ем|им)|в(о|а)зь?м(у|ем|ём)|ищу\s+пас|ищу\s+попутчик|выезжа(ю|ем)|выезд|нужен\s+пас+ажир/i;
-  const passRegex = /(и|е)щ(у|ю)|ище(м|т)|пас+ажир|ед(е|и|у)т|нужн.|хочу\s(у|по|вы)?ехат|отправ(лю|ить|им)|пер(е|и)дам|чел/i;
+  const passengerRegex = /(и|е)щ(у|ю)|ище(м|т)|пас+ажир|ед(е|и|у)т|нужн.|хочу\s(у|по|вы)?ехат|отправ(лю|ить|им)|пер(е|и)дам|чел/i;
+  if (minibusRegex.test(body)) return 'M';
+  if ((/уеду/i).test(body)) return 'P';
+  if ((/надо\.*ув(е|и)(з|с)ти/i).test(body)) return 'P';
   // ищем сначала водителей из-за "ищу пас / попутчик"
-  if (body.match(driverRegex)) return 'D';
-  if (body.match(passRegex)) return 'P';
-
-  if (body.match(/есть(\s*\d*\s*)мест.*\?/i)) return 'P';
-  if (body.match(/есть(\s*\d*\s*)мест/i)) return 'D';
+  if (driverRegex.test(body)) return 'D';
+  if (passengerRegex.test(body)) return 'P';
+  // если роль не найдена
+  if ((/есть(\s*\d*\s*)мест.*\?/i).test(body)) return 'P';
+  if ((/есть(\s*\d*\s*)мест/i).test(body)) return 'D';
   return null;
 }
 
@@ -57,22 +59,17 @@ function parseMsg(msg) {
     tels: null,
     ...msg,
   };
+  
+  rec.role = parseRole(msg.Body);
+  if (rec.role === 'M') return rec;
+  rec.cargo = msg.Body.test(/груз/i);
+  rec.tels = parseTel(msg.Body);
 
-  if (msg.Body.match(/расписани|маршрут/i)) {
-    rec.role = 'M';
-  } else {
-    if (msg.Body.match(/груз/i)) {
-      rec.cargo = true;
-    }
-    rec.role = parseRole(msg.Body);
-    rec.tels = parseTel(msg.Body);
+  rec.from = parseDirection('from', msg.Body);
+  rec.to = parseDirection('to', msg.Body);
 
-    rec.from = parseDirection('from', msg.Body);
-    rec.to = parseDirection('to', msg.Body);
-
-    rec.cleanedBody = cleanBody(msg.Body);
-    rec.route = routeParser(msg.Body);
-  }
+  rec.cleanedBody = cleanBody(msg.Body);
+  rec.route = routeParser(msg.Body);  
 
   return rec;
 }
