@@ -14,7 +14,7 @@ const menuItemsKbi = Markup.inlineKeyboard(
   [
     Markup.button.callback('Изменить роль', 'role'),
     Markup.button.callback('Удалить мои объявления', 'delete'),
-    Markup.button.callback('Инструкция', 'help'),
+    Markup.button.callback('Справка', 'help'),
     Markup.button.callback('Обратная связь', 'feedback'),
   ],
   { columns: 1 }

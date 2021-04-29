@@ -12,6 +12,8 @@ const { menuBtnKb, setRoleKbi, menuItemsKbi } = require('./keyboards.js');
 
 const bot = new Telegraf(config.get('bot.token'));
 
+const menuItemsTxt = 'выберите действие';
+
 bot.catch((error, ctx) => {
   ctx.reply('ошибка!');
   writeFileSync(
@@ -27,7 +29,7 @@ bot.start(async (ctx) => {
   userData._key = String(ctx.update.message.from.id);
   userData.chat_id = ctx.update.message.chat.id;
   userData.startDate = ctx.update.message.date;
-  await setUser(userData);  
+  await setUser(userData);
   ctx.reply('меню', menuBtnKb.resize());
   ctx.reply(setRoleTxt, setRoleKbi.resize());
 });
@@ -42,7 +44,7 @@ bot.use(async (ctx, next) => {
 })
 
 bot.command('menu', async (ctx) => { 
-  ctx.reply('меню', menuItemsKbi.resize());
+  ctx.reply(menuItemsTxt, menuItemsKbi.resize());
 });
 
 bot.command('st', async (ctx) => {
@@ -61,8 +63,8 @@ bot.on('text', async (ctx, next) => {
   if (text.match(/err/i)) {
     throw new Error('test_bot_error');
   }
-  if (text.match(/меню/i)) {
-    return ctx.reply('меню', menuItemsKbi.resize());
+  if (text.match(/меню|menu/i)) {
+    return ctx.reply(menuItemsTxt, menuItemsKbi.resize());
   }
   if (!ctx.state.user.role) {
     return ctx.reply(setRoleTxt, setRoleKbi);
