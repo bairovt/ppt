@@ -1,6 +1,6 @@
 
 const { cleanBody, routeParser } = require('../src/parse/clean-body-parser.js');
-const { parseRole, cargoParser } = require('../src/parse/parser.js');
+const { roleParser, cargoParser } = require('../src/parse/parser.js');
 const msgs = require('./test-msgs.js');
 
 describe('cleanBody func', () => {
@@ -23,11 +23,11 @@ describe('routeParser', ()=> {
   }   
 });
 
-describe('parseRole', () => {
+describe('roleParser', () => {
   for (let msg of msgs) {
     if (!msg.skip && msg.role) {
       test(msg.body, () => {
-        expect(parseRole(msg.body)).toEqual(msg.role);
+        expect(roleParser(msg.body)).toEqual(msg.role);
       });
     }
   }
@@ -43,5 +43,5 @@ describe('cargo check', () => {
   }
 });
 
-// todo test parseTel and remove tels = require(test-msgs
+// todo test telParser and remove tels = require(test-msgs
 

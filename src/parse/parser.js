@@ -25,7 +25,7 @@ function parseDirection(direction, body) {
   return null;
 }
 
-function parseTel(body) {
+function telParser(body) {
   // todo tests
   let tels = [];
   const deleteSymbolsRegex = /[-\+\(\)\s]/g;
@@ -40,7 +40,7 @@ function cargoParser(body) {
   return cargoRegex.test(body);
 }
 
-function parseRole(body) {  
+function roleParser(body) {  
   const minibusRegex = /расписани/i;
   const driverRegex = /(по)?ед(у|ем|им)|в(о|а)зь?м(у|ем|ём)|ищу\s+пас|ищу\s+попутчик|выезжа(ю|ем)|выезд|нужен\s+пас+ажир/i;
   const passengerRegex = /(и|е)щ(у|ю)|ище(м|т)|пас+ажир|ед(е|и|у)т|нужн.|хочу\s(у|по|вы)?ехат|отправ(лю|ить|им)|пер(е|и)дам|чел/i;
@@ -65,10 +65,10 @@ function parseMsg(msg) {
     ...msg,
   };
   
-  rec.role = parseRole(msg.Body);
+  rec.role = roleParser(msg.Body);
   if (rec.role === 'M') return rec;
   rec.cargo = cargoParser(msg.Body);
-  rec.tels = parseTel(msg.Body);
+  rec.tels = telParser(msg.Body);
 
   rec.from = parseDirection('from', msg.Body);
   rec.to = parseDirection('to', msg.Body);
@@ -79,4 +79,4 @@ function parseMsg(msg) {
   return rec;
 }
 
-module.exports = { parseDirection, parseTel, parseRole, parseMsg, cargoParser };
+module.exports = { parseDirection, telParser, roleParser, parseMsg, cargoParser };
