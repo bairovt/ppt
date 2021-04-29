@@ -35,6 +35,11 @@ function parseTel(body) {
   return tels === null ? null : tels.map((tel) => tel.replace(/^7/, 8));
 }
 
+function cargoParser(body) {
+  const cargoRegex = /груз/i;
+  return cargoRegex.test(body);
+}
+
 function parseRole(body) {  
   const minibusRegex = /расписани/i;
   const driverRegex = /(по)?ед(у|ем|им)|в(о|а)зь?м(у|ем|ём)|ищу\s+пас|ищу\s+попутчик|выезжа(ю|ем)|выезд|нужен\s+пас+ажир/i;
@@ -62,7 +67,7 @@ function parseMsg(msg) {
   
   rec.role = parseRole(msg.Body);
   if (rec.role === 'M') return rec;
-  rec.cargo = msg.Body.test(/груз/i);
+  rec.cargo = cargoParser(msg.Body);
   rec.tels = parseTel(msg.Body);
 
   rec.from = parseDirection('from', msg.Body);
@@ -74,4 +79,4 @@ function parseMsg(msg) {
   return rec;
 }
 
-module.exports = { parseDirection, parseTel, parseRole, parseMsg };
+module.exports = { parseDirection, parseTel, parseRole, parseMsg, cargoParser };
