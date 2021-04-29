@@ -1,5 +1,5 @@
 const { Telegraf, Markup } = require('telegraf');
-const { routeParser } = require('../parse/clean-body-parser.js');
+const { routeParser } = require('../parse/parser.js');
 const { findRoute } = require('../findRoute.js');
 const { setUser, getUser, setUserRole, logToDb } = require('../bot/user.js');
 const { errorLog } = require('../lib/error-log.js');

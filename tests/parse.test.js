@@ -1,6 +1,6 @@
 
-const { cleanBody, routeParser } = require('../src/parse/clean-body-parser.js');
-const { roleParser, cargoParser } = require('../src/parse/parser.js');
+const { cleanBody } = require('../src/parse/clean-body-parser.js');
+const { roleParser, cargoParser, routeParser } = require('../src/parse/parser.js');
 const msgs = require('./test-msgs.js');
 
 describe('cleanBody func', () => {

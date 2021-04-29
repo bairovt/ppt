@@ -53,19 +53,4 @@ function cleanBody(body) {
   return str.trim();
 }
 
-function routeParser(body) {
-  const route = [];
-  let cleanedBody = cleanBody(body);
-  let words = cleanedBody.split(/\s|\-/);  
-  for (let word of words) {
-    // todo: parse point names with dashes and spaces (dash: true)
-    let point = points.find((point, idx, points) => {
-      if (point.names.includes(word.toLocaleLowerCase())) return true;
-      return false;
-    });
-    if (point) route.push(point.name);
-  }
-  return route;
-}
-
-module.exports = { checkPairedNames, cleanBody, routeParser };
+module.exports = { checkPairedNames, cleanBody};

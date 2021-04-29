@@ -1,7 +1,7 @@
 'use strict';
 
 const points = require('../../data/points.js');
-const {cleanBody, routeParser} = require('./clean-body-parser.js');
+const {cleanBody} = require('./clean-body-parser.js');
 
 function parseDirection(direction, body) {
   let directionRegEx = '';
@@ -23,6 +23,20 @@ function parseDirection(direction, body) {
     return point ? point.name : null;
   }
   return null;
+}
+
+function routeParser(body) {
+  const route = [];
+  let cleanedBody = cleanBody(body);
+  let words = cleanedBody.split(/\s|\-/);
+  for (let word of words) {
+    let point = points.find((point) => {
+      if (point.names.includes(word.toLocaleLowerCase())) return true;
+      return false;
+    });
+    if (point) route.push(point.name);
+  }
+  return route;
 }
 
 function telParser(body) {
@@ -74,9 +88,9 @@ function parseMsg(msg) {
   rec.to = parseDirection('to', msg.Body);
 
   rec.cleanedBody = cleanBody(msg.Body);
-  rec.route = routeParser(msg.Body);  
+  rec.route = routeParser(msg.Body);
 
   return rec;
 }
 
-module.exports = { parseDirection, telParser, roleParser, parseMsg, cargoParser };
+module.exports = { parseDirection, telParser, roleParser, parseMsg, cargoParser, routeParser };
