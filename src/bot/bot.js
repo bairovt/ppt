@@ -1,4 +1,4 @@
-const { Telegraf, Markup } = require('telegraf');
+const { Telegraf, session, Markup, Scenes: {BaseScene, Stage} } = require('telegraf');
 const { routeParser } = require('../parse/parser.js');
 const { findRoute } = require('../findRoute.js');
 const { setUser, getUser, setUserRole, logToDb } = require('../bot/user.js');
@@ -7,12 +7,17 @@ const { writeFileSync } = require('fs');
 const config = require('config');
 const path = require('path');
 const { getStats } = require('./funcs/get-stats.js');
-const { helpTxt, setRoleTxt, howToSearchTxt } = require('./texts.js');
+const { helpTxt, setRoleTxt, howToSearchTxt, menuItemsTxt } = require('./texts.js');
 const { menuBtnKb, setRoleKbi, menuItemsKbi } = require('./keyboards.js');
+const feedbackStage = require('./scenes/feedback.js');
+
+////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////
+
 
 const bot = new Telegraf(config.get('bot.token'));
-
-const menuItemsTxt = 'выберите действие';
+bot.use(session());
 
 bot.catch((error, ctx) => {
   ctx.reply('ошибка!');
@@ -22,6 +27,8 @@ bot.catch((error, ctx) => {
   );
   throw(error);
 });
+
+bot.use(feedbackStage.middleware());
 
 bot.start(async (ctx) => {
   // first time: updateType: my_chat_member;
@@ -46,6 +53,7 @@ bot.use(async (ctx, next) => {
 bot.command('menu', async (ctx) => { 
   ctx.reply(menuItemsTxt, menuItemsKbi.resize());
 });
+bot.help((ctx) => ctx.reply(helpTxt));
 
 bot.command('st', async (ctx) => {
   if (ctx.state.user.approle !== 'admin') {
@@ -56,7 +64,6 @@ bot.command('st', async (ctx) => {
   }
 });
 
-bot.help((ctx) => ctx.reply(helpTxt));
 
 bot.on('text', async (ctx, next) => {  
   const text = ctx.update.message.text;  
@@ -65,6 +72,9 @@ bot.on('text', async (ctx, next) => {
   }
   if (text.match(/меню|menu/i)) {
     return ctx.reply(menuItemsTxt, menuItemsKbi.resize());
+  }
+  if (text.match(/справка|help/i)) {
+    return ctx.reply(helpTxt);
   }
   if (!ctx.state.user.role) {
     return ctx.reply(setRoleTxt, setRoleKbi);
@@ -124,21 +134,21 @@ bot.action('i_am_passenger', async (ctx) => {
   ctx.reply(howToSearchTxt);
 });
 
-bot.action('i_am_driver', async (ctx, next) => {
+bot.action('i_am_driver', async (ctx) => {
   await ctx.answerCbQuery();
   await setUserRole(ctx.state.user._key, 'D');
   ctx.reply('Вы - водитель, поиск будет показывать объявления пассажиров');
   ctx.reply(howToSearchTxt);
 });
 
-bot.action('role', async (ctx, next) => {
+bot.action('role', async (ctx) => {
   await ctx.answerCbQuery();  
   ctx.reply(setRoleTxt, setRoleKbi.resize());
 });
 
-bot.action('help', async (ctx, next) => {
-  await ctx.answerCbQuery();  
-  ctx.reply(helpTxt);
+bot.action('feedback', async (ctx) => {
+  await ctx.answerCbQuery();
+  ctx.scene.enter('feedbackScene');  
 });
 
 // bot.on('message', async (ctx) => {

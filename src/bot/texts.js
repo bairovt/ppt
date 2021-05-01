@@ -25,9 +25,10 @@ const helpTxt =
 
 /menu - вызвать главное меню, также можно: меню, menu
 
-/help - показать справку (это сообщение)`;
+/help - показать справку (это сообщение), также можно: справка, help`;
 
-const selectActionTxt = 'Выберите действие:';
+// const selectActionTxt = 'Выберите действие:';
+const menuItemsTxt = 'выберите действие';
 const setRoleTxt = 'Укажите свою роль. Ищу машину - для пассажиров, \nЕду, возьму - для водителей';
 
-module.exports = { helpTxt, selectActionTxt, setRoleTxt, howToSearchTxt };
+module.exports = { helpTxt, menuItemsTxt, setRoleTxt, howToSearchTxt };

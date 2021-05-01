@@ -1,6 +1,6 @@
 const {Markup } = require('telegraf');
 
-const menuBtnKb = Markup.keyboard(['Меню']);
+const menuBtnKb = Markup.keyboard(['меню', 'справка'], { columns: 2 });
 
 const setRoleKbi = Markup.inlineKeyboard(
   [
@@ -13,8 +13,7 @@ const setRoleKbi = Markup.inlineKeyboard(
 const menuItemsKbi = Markup.inlineKeyboard(
   [
     Markup.button.callback('Изменить роль', 'role'),
-    Markup.button.callback('Удалить мои объявления', 'delete'),
-    Markup.button.callback('Справка', 'help'),
+    Markup.button.callback('Удалить мои объявления', 'delete'),    
     Markup.button.callback('Обратная связь', 'feedback'),
   ],
   { columns: 1 }
