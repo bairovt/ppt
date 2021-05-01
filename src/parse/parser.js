@@ -77,7 +77,8 @@ function parseMsg(msg) {
     from: null,
     to: null,
     tels: null,
-    ...msg,
+    route: [],
+    ...msg,    
   };
   
   rec.role = roleParser(msg.Body);

@@ -45,21 +45,23 @@ async function fetchParseLoad() {
     // throw new Error();
 
     for (let msg of msgs) {
-      const rec = parseMsg(msg);
-      if (rec) {
-        rec.src = 'viber';
+      const recData = parseMsg(msg);
+      if (recData.route.length < 2) {
+        await db.collection('UnroutedRecs').save(recData);
+      } else { // 
+        recData.src = 'viber';
         try {
-          const newRec = await recsCollection.save(rec, { returnNew: true });
-          recs.push(newRec);
+          const rec = await recsCollection.save(recData, { returnNew: true });
+          recs.push(rec);
         } catch (err) {
           // unique constraint violated
           if (err.code === 409 && err.errorNum === 1210) {
             let existingRec = await recsCollection
-              .byExample({ Body: rec.Body })
+              .byExample({ Body: recData.Body })
               .then((cursor) => cursor.next());
 
-            if (existingRec.TimeStamp < rec.TimeStamp) {
-              await recsCollection.update(existingRec._id, rec);
+            if (existingRec.TimeStamp < recData.TimeStamp) {
+              await recsCollection.update(existingRec._id, recData);
             }
 
             dupls.allCount++;
