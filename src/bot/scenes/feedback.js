@@ -24,7 +24,7 @@ feedbackScene.on('text', async (ctx) => {
   return ctx.scene.leave();
 });
 feedbackScene.leave(ctx => {
-  ctx.reply('feedbackScene.leave');
+  // ctx.reply('feedbackScene.leave');
 });
 
 const feedbackStage = new Stage([feedbackScene]);

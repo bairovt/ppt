@@ -6,8 +6,7 @@ const howToSearchTxt = `
   Забайкальск Чита
 
 ✅ В оба направления:
-  Чита & УУ
-  & Збк Чита`;
+  Чита & УУ`;
 
 const helpTxt =
   howToSearchTxt +
