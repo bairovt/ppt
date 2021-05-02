@@ -10,6 +10,7 @@ const { getStats } = require('./funcs/get-stats.js');
 const { helpTxt, setRoleTxt, howToSearchTxt, menuItemsTxt } = require('./texts.js');
 const { menuBtnKb, setRoleKbi, menuItemsKbi } = require('./keyboards.js');
 const feedbackStage = require('./scenes/feedback.js');
+const attachTelStage = require('./scenes/attach-tel-scene.js');
 
 ////////////////////////////////////////////////////////////////
 
@@ -27,8 +28,6 @@ bot.catch((error, ctx) => {
   );
   throw(error);
 });
-
-bot.use(feedbackStage.middleware());
 
 bot.start(async (ctx) => {
   // first time: updateType: my_chat_member;
@@ -48,7 +47,10 @@ bot.use(async (ctx, next) => {
   await next();
   // console.timeEnd(`Processing update ${ctx.update.update_id}`);
   // if (process.env.NODE_ENV === 'development') console.log('ctx: ', ctx);
-})
+});
+
+bot.use(feedbackStage.middleware());
+bot.use(attachTelStage.middleware());
 
 bot.command('menu', async (ctx) => { 
   ctx.reply(menuItemsTxt, menuItemsKbi.resize());
@@ -104,7 +106,7 @@ bot.on('text', async (ctx, next) => {
     } else {
       for (let rec of recs) {
         resp = rec.Time + ' | ' + rec.Body;
-        if (user.approle === 'admin') resp = `${rec.src}: ${rec.ChatName}\n` + resp;
+        if (user.approle === 'admin') resp = `(${rec.src}: ${rec.ChatName})\n` + resp;
         await ctx.telegram.sendMessage(ctx.message.chat.id, resp); // ctx.reply();
       }
     }
@@ -141,14 +143,19 @@ bot.action('i_am_driver', async (ctx) => {
   ctx.reply(howToSearchTxt);
 });
 
-bot.action('role', async (ctx) => {
+bot.action('change_role', async (ctx) => {
   await ctx.answerCbQuery();  
   ctx.reply(setRoleTxt, setRoleKbi.resize());
 });
 
+bot.action('attach_tel', async (ctx) => {
+  await ctx.answerCbQuery();
+  ctx.scene.enter('attachTelScene');
+});
+
 bot.action('feedback', async (ctx) => {
   await ctx.answerCbQuery();
-  ctx.scene.enter('feedbackScene');  
+  ctx.scene.enter('feedbackScene');
 });
 
 // bot.on('message', async (ctx) => {

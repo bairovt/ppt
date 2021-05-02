@@ -1,4 +1,4 @@
-const {findRoute} = require('../findRoute.js'
+const {findRoute} = require('../findRoute.js');
 const fs = require('fs');
 
 async function main() {
