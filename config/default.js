@@ -20,5 +20,6 @@ module.exports = {
   },
   bot: {
     token: 'bot-token-blah-blah',
+    adsInterval: 2
   },
 };

@@ -2,7 +2,7 @@ const { aql } = require('arangojs');
 const config = require('config');
 const db = require('../src/lib/arangodb.js');
 
-const minTime = Date.now() - 2*24*3600*1000; // days
+const minTime = Date.now() - config.get('bot.adsInterval') * 24 * 3600 * 1000; // days
 
 async function findRoute(role, direction = 1, from, to) {
   const recs = await db
