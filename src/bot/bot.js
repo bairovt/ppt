@@ -1,4 +1,4 @@
-const { Telegraf, session, Markup, Scenes: {BaseScene, Stage} } = require('telegraf');
+const { Telegraf, session, Markup, Scenes: {Stage} } = require('telegraf');
 const { routeParser } = require('../parse/parser.js');
 const { findRoute } = require('../findRoute.js');
 const { setUser, getUser, setUserRole, logToDb } = require('../bot/user.js');
@@ -9,13 +9,14 @@ const path = require('path');
 const { getStats } = require('./funcs/get-stats.js');
 const { helpTxt, setRoleTxt, howToSearchTxt, menuItemsTxt } = require('./texts.js');
 const { menuBtnKb, setRoleKbi, menuItemsKbi } = require('./keyboards.js');
-const feedbackStage = require('./scenes/feedback-scene.js');
-const attachTelStage = require('./scenes/attach-tel-scene.js');
+const feedbackScene = require('./scenes/feedback-scene.js');
+const attachTelScene = require('./scenes/attach-tel-scene.js');
 const deleteAdsStage = require('./scenes/delete-ads-scene.js');
 
 ////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////
+const stage = new Stage([feedbackScene, attachTelScene, deleteAdsStage]);
 
 
 const bot = new Telegraf(config.get('bot.token'));
@@ -50,9 +51,9 @@ bot.use(async (ctx, next) => {
   // if (process.env.NODE_ENV === 'development') console.log('ctx: ', ctx);
 });
 
-bot.use(attachTelStage.middleware());
+bot.use(stage.middleware());
 // bot.use(deleteAdsStage.middleware());
-bot.use(feedbackStage.middleware());
+// bot.use(feedbackStage.middleware());
 
 bot.command('menu', async (ctx) => { 
   ctx.reply(menuItemsTxt, menuItemsKbi.resize());

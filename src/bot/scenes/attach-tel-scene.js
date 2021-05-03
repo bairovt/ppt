@@ -4,7 +4,7 @@ const {
   Telegraf,
   session,
   Markup,
-  Scenes: { BaseScene, Stage },
+  Scenes: { BaseScene },
 } = require('telegraf');
 
 const removeKbMarkup = Markup.removeKeyboard();
@@ -47,7 +47,7 @@ attachTelScene.on('text', async (ctx) => {
   else upd.tel1 = String(telNum);
   await db.collection('Users').update(ctx.state.user._key, upd)
 
-  ctx.reply(`Телефон ${telNum} привязан`);
+  ctx.reply(`Телефон ${telNum} успешно привязан к Вашей учетной записи`);
   return ctx.scene.leave();
 });
 
@@ -58,8 +58,6 @@ attachTelScene.action('cancel_attach_tel', async ctx => {
   ctx.scene.leave();
 });
 
-const attachTelStage = new Stage([attachTelScene]);
-
-module.exports = attachTelStage;
+module.exports = attachTelScene;
 
 

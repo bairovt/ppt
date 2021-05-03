@@ -4,7 +4,7 @@ const {
   Telegraf,
   session,
   Markup,
-  Scenes: { BaseScene, Stage },
+  Scenes: { BaseScene },
 } = require('telegraf');
 
 const feedbackScene = new BaseScene('feedbackScene');
@@ -27,8 +27,6 @@ feedbackScene.leave(ctx => {
   // ctx.reply('feedbackScene.leave');
 });
 
-const feedbackStage = new Stage([feedbackScene]);
-
-module.exports = feedbackStage;
+module.exports = feedbackScene;
 
 

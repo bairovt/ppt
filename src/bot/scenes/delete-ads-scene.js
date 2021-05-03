@@ -55,6 +55,4 @@ deleteAdsScene.action('cancel_delete_ads', async (ctx) => {
   ctx.scene.leave();
 });
 
-const deleteAdsStage = new Stage([deleteAdsScene]);
-
-module.exports = deleteAdsStage;
+module.exports = deleteAdsScene;
