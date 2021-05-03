@@ -7,8 +7,6 @@ const {
   Scenes: { BaseScene },
 } = require('telegraf');
 
-const removeKbMarkup = Markup.removeKeyboard();
-
 const cancelAttachTelKbi = Markup.inlineKeyboard(
   [Markup.button.callback('Отмена', 'cancel_attach_tel')],
   { columns: 1 }
@@ -16,7 +14,12 @@ const cancelAttachTelKbi = Markup.inlineKeyboard(
 
 const attachTelScene = new BaseScene('attachTelScene');
 
-attachTelScene.enter(async (ctx) => {  
+attachTelScene.enter(async (ctx) => {
+  const user = ctx.state.user;
+  if (user.tel1 && user.tel2) {
+    ctx.reply(`К учетной записи можно привязать не более 2 телефонов, к Вашей уже привязано 2: ${user.tel1}, ${user.tel2}`);
+    return ctx.scene.leave();
+  }
   await ctx.deleteMessage();
   ctx.reply(
     'Отправьте номер Вашего телефона в формате 89241234567, чтобы привязать его к себе. Возможно привязать 2 номера',

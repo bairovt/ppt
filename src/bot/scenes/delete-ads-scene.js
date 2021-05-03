@@ -14,7 +14,7 @@ const cancelOrDeleteAdsKbi = Markup.inlineKeyboard(
     Markup.button.callback('Да', 'confirm_delete_ads'),
     Markup.button.callback('Отмена', 'cancel_delete_ads'),
   ],
-  { columns: 1 }
+  { columns: 2 }
 );
 
 const deleteAdsScene = new BaseScene('deleteAdsScene');
@@ -27,8 +27,7 @@ deleteAdsScene.enter(async (ctx) => {
     return ctx.scene.leave();
   };
   ctx.reply(
-    `Подтверждаете удаление всех объявлений, содержащих номера телефонов: 
-      ${user.tel1}${user.tel2 ? ', '+user.tel2 : ''}?`,
+    `Удалить все объявления, содержащие номера телефонов: ${user.tel1}${user.tel2 ? ', '+user.tel2 : ''} ?`,
     cancelOrDeleteAdsKbi.resize()
   );
 });
@@ -39,14 +38,17 @@ deleteAdsScene.action('confirm_delete_ads', async (ctx) => {
   const user = ctx.state.user;
   await Promise.all([ctx.answerCbQuery(), ctx.deleteMessage()]);
   const userTels = [user.tel1, user.tel2];
-  await db
+  const removedRecs = await db
     .query(
       aql`
     FOR rec IN Recs
-    FILTER LENGH(INTERSECTION(rec.tels, ${userTels})) != 0    
-    REMOVE rec IN Recs`
-    );
-  ctx.reply('Ваши объявления успешно удалены');
+    FILTER LENGTH(INTERSECTION(rec.tels, ${userTels})) != 0    
+    REMOVE rec IN Recs
+    RETURN OLD`
+    )
+    .then((cursor) => cursor.all());
+  console.log('delete_res:', removedRecs);
+  ctx.reply(`Удалено объявлений: ${removedRecs.length}`);
   ctx.scene.leave();
 });
 

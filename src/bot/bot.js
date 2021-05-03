@@ -16,8 +16,6 @@ const deleteAdsStage = require('./scenes/delete-ads-scene.js');
 ////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////
-const stage = new Stage([feedbackScene, attachTelScene, deleteAdsStage]);
-
 
 const bot = new Telegraf(config.get('bot.token'));
 bot.use(session());
@@ -44,16 +42,16 @@ bot.start(async (ctx) => {
 
 // set user mw
 bot.use(async (ctx, next) => {
-  // console.time(`Processing update ${ctx.update.update_id}`);
+  ctx.state.startTime = Date.now();
   ctx.state.user = await getUser(ctx);
   await next();
-  // console.timeEnd(`Processing update ${ctx.update.update_id}`);
-  // if (process.env.NODE_ENV === 'development') console.log('ctx: ', ctx);
+  if (process.env.NODE_ENV === 'development') {
+    console.log('duration: ', Date.now() - ctx.state.startTime);
+  }
 });
 
+const stage = new Stage([feedbackScene, attachTelScene, deleteAdsStage]);
 bot.use(stage.middleware());
-// bot.use(deleteAdsStage.middleware());
-// bot.use(feedbackStage.middleware());
 
 bot.command('menu', async (ctx) => { 
   ctx.reply(menuItemsTxt, menuItemsKbi.resize());
@@ -135,14 +133,14 @@ bot.on('text', async (ctx, next) => {
 bot.action('i_am_passenger', async (ctx) => {
   await ctx.answerCbQuery();
   await setUserRole(ctx.state.user._key, 'P');
-  ctx.reply('Вы - пассажир, поиск будет показывать объявления водителей');
+  await ctx.reply('Вы - пассажир, поиск будет показывать объявления водителей');
   ctx.reply(howToSearchTxt);
 });
 
 bot.action('i_am_driver', async (ctx) => {
   await ctx.answerCbQuery();
   await setUserRole(ctx.state.user._key, 'D');
-  ctx.reply('Вы - водитель, поиск будет показывать объявления пассажиров');
+  await ctx.reply('Вы - водитель, поиск будет показывать объявления пассажиров');
   ctx.reply(howToSearchTxt);
 });
 
@@ -165,10 +163,6 @@ bot.action('feedback', async (ctx) => {
   await ctx.answerCbQuery();
   ctx.scene.enter('feedbackScene');
 });
-
-// bot.on('message', async (ctx) => {
-//   ctx.reply(`on message`);
-// });
 
 bot.launch();
 process.once('SIGINT', () => bot.stop('SIGINT'))
