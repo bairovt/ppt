@@ -16,7 +16,7 @@ const cancelAttachTelKbi = Markup.inlineKeyboard(
 
 const attachTelScene = new BaseScene('attachTelScene');
 
-attachTelScene.enter(async (ctx) => {
+attachTelScene.enter(async (ctx) => {  
   await ctx.deleteMessage();
   ctx.reply(
     'Отправьте номер Вашего телефона в формате 89241234567, чтобы привязать его к себе. Возможно привязать 2 номера',

@@ -9,8 +9,9 @@ const path = require('path');
 const { getStats } = require('./funcs/get-stats.js');
 const { helpTxt, setRoleTxt, howToSearchTxt, menuItemsTxt } = require('./texts.js');
 const { menuBtnKb, setRoleKbi, menuItemsKbi } = require('./keyboards.js');
-const feedbackStage = require('./scenes/feedback.js');
+const feedbackStage = require('./scenes/feedback-scene.js');
 const attachTelStage = require('./scenes/attach-tel-scene.js');
+const deleteAdsStage = require('./scenes/delete-ads-scene.js');
 
 ////////////////////////////////////////////////////////////////
 
@@ -49,8 +50,9 @@ bot.use(async (ctx, next) => {
   // if (process.env.NODE_ENV === 'development') console.log('ctx: ', ctx);
 });
 
-bot.use(feedbackStage.middleware());
 bot.use(attachTelStage.middleware());
+// bot.use(deleteAdsStage.middleware());
+bot.use(feedbackStage.middleware());
 
 bot.command('menu', async (ctx) => { 
   ctx.reply(menuItemsTxt, menuItemsKbi.resize());
@@ -149,8 +151,13 @@ bot.action('change_role', async (ctx) => {
 });
 
 bot.action('attach_tel', async (ctx) => {
-  await ctx.answerCbQuery();
+  await ctx.answerCbQuery();  
   ctx.scene.enter('attachTelScene');
+});
+
+bot.action('delete_ads', async (ctx) => {
+  await ctx.answerCbQuery();
+  ctx.scene.enter('deleteAdsScene');
 });
 
 bot.action('feedback', async (ctx) => {
