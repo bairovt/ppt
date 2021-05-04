@@ -95,12 +95,16 @@ bot.on('text', async (ctx, next) => {
       'По маршруту ' + JSON.stringify(route) + '\nничего не найдено.\nНеобходимо 2 нас. пункта'
     );
   } else {
-    let direction = 1;
-    if (text.match(/&/i)) {
+    let direction = 1;    
+    if (/&/i.test(text)) {
       direction = 2;
     }
+    let cargo = false;
+    if (/груз/i.test(text)) {
+      cargo = true;
+    }
     const roleToFind = user.role === 'D' ? 'P' : 'D';
-    const recs = await findRoute(roleToFind, direction, route[0], route[1]);
+    const recs = await findRoute(roleToFind, direction, route, cargo);
     let resp = '';
     if (recs.length === 0) {
       ctx.reply('не найдено')

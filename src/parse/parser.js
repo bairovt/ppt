@@ -60,14 +60,14 @@ function roleParser(body) {
   const driverRegex = /(по)?ед(у|ем|им)|в(о|а)зь?м(у|ем|ём)|ищу\s+пас|ищу\s+попутчик|выезжа(ю|ем)|выезд|нужен\s+пас+ажир/i;
   const passengerRegex = /(и|е)щ(у|ю)|ище(м|т)|пас+ажир|ед(е|и|у)т|нужн.|хочу\s(у|по|вы)?ехат|отправ(лю|ить|им)|пер(е|и)дам|чел/i;
   if (minibusRegex.test(body)) return 'M';
-  if ((/уеду/i).test(body)) return 'P';
-  if ((/надо\.*ув(е|и)(з|с)ти/i).test(body)) return 'P';
+  if (/уеду/i.test(body)) return 'P';
+  if (/надо\.*ув(е|и)(з|с)ти/i.test(body)) return 'P';
   // ищем сначала водителей из-за "ищу пас / попутчик"
   if (driverRegex.test(body)) return 'D';
   if (passengerRegex.test(body)) return 'P';
   // если роль не найдена
-  if ((/есть(\s*\d*\s*)мест.*\?/i).test(body)) return 'P';
-  if ((/есть(\s*\d*\s*)мест/i).test(body)) return 'D';
+  if (/есть(\s*\d*\s*)мест.*\?/i.test(body)) return 'P';
+  if (/есть(\s*\d*\s*)мест/i.test(body)) return 'D';
   return null;
 }
 
