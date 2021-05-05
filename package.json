@@ -10,7 +10,8 @@
     "vk": "node ./src/vk-fetch-parse-load.js",
     "test": "jest",
     "cbu": "node ./src/utils/clean-body-util.js",
-    "pru": "node ./src/utils/parse-route-util.js"
+    "pru": "node ./src/utils/parse-route-util.js",
+    "pmu": "node ./src/utils/parse-msg-util.js"
   },
   "keywords": [],
   "author": "",

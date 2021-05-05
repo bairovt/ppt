@@ -39,7 +39,7 @@ async function fetchParseLoad() {
     // throw new Error();
 
     for (let msg of msgs) {
-      const recData = parseMsg(msg);
+      const recData = await parseMsg(msg);
       if (recData.route.length < 2) {
         const UnroutedRecsColl = db.collection('UnroutedRecs');
         try {
