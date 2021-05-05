@@ -313,6 +313,22 @@ const points = [
     names: ['аршан', 'аршана'],
   },
   {
+    _key: 'Vyshka',
+    name: 'Вышка',
+    names: ['вышка', 'вышки'],
+  },
+  {
+    _key: 'Kharbyaty',
+    name: 'Харбяты',
+    names: ['харбяты', 'харбят'],
+  },
+  {
+    _key: 'ZunMurino',
+    name: 'Зун-Мурино',
+    names: ['зунмурино'],
+    regex: /зун(\-|\s)?мурино/gi,
+  },
+  {
     _key: 'Mondy',
     name: 'Монды',
     names: ['монды', 'монд', 'мондов'],

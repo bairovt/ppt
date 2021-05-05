@@ -9,7 +9,8 @@
     "viber": "node ./src/viber-fetch-parse-load.js",
     "vk": "node ./src/vk-fetch-parse-load.js",
     "test": "jest",
-    "cbu": "node ./src/utils/clean-body-util.js"
+    "cbu": "node ./src/utils/clean-body-util.js",
+    "pru": "node ./src/utils/parse-route-util.js"
   },
   "keywords": [],
   "author": "",
