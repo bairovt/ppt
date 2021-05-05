@@ -41,6 +41,7 @@ function cleanBody(body) {
     str = str.replace(regex, ' ');
   }
 
+  // str = str.replace(/\s{2,}/gi, ' ');
   str = str.replace(/\s*\-\s*/gi, '-'); // тире, окруженное пробелами, на тире
   str = checkPairedNames(str);
   str = str.replace(/\-/gi, ' '); // все тире на пробелы, т.к. парные назв уже обработаны
