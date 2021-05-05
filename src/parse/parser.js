@@ -1,40 +1,42 @@
 'use strict';
 
-const points = require('../../data/points.js');
+const {aql} = require('arangojs');
+const db = require('../lib/arangodb.js');
 const {cleanBody} = require('./clean-body-parser.js');
 
-function parseDirection(direction, body) {
-  let directionRegEx = '';
-  switch (direction) {
-    case 'from':
-      directionRegEx = /\s+(с|из|от)\s+([А-Яа-я]+)/i;
-      break;
-    case 'to':
-      directionRegEx = /\s+(в|до)\s+([А-Яа-я]+)/i;
-      break;
-  }
+// function parseDirection(direction, body) {
+//   let directionRegEx = '';
+//   switch (direction) {
+//     case 'from':
+//       directionRegEx = /\s+(с|из|от)\s+([А-Яа-я]+)/i;
+//       break;
+//     case 'to':
+//       directionRegEx = /\s+(в|до)\s+([А-Яа-я]+)/i;
+//       break;
+//   }
 
-  let directionMatch = body.match(directionRegEx);
-  if (directionMatch) {
-    let token = directionMatch[2]; // берем вторую скобочную группу
-    let point = points.find((point) => {
-      return point.names.includes(token.toLocaleLowerCase());
-    });
-    return point ? point.name : null;
-  }
-  return null;
-}
+//   let directionMatch = body.match(directionRegEx);
+//   if (directionMatch) {
+//     let token = directionMatch[2]; // берем вторую скобочную группу
+//     let point = points.find((point) => {
+//       return point.names.includes(token.toLocaleLowerCase());
+//     });
+//     return point ? point.name : null;
+//   }
+//   return null;
+// }
 
-function routeParser(body) {
+async function routeParser(body) {
   const route = [];
-  let cleanedBody = cleanBody(body);
+  let cleanedBody = await cleanBody(body);
   let words = cleanedBody.split(/\s|\-/);
-  for (let word of words) {
-    let point = points.find((point) => {
-      if (point.names.includes(word.toLocaleLowerCase())) return true;
-      return false;
-    });
-    if (point) route.push(point.name);
+  for (let word of words) {    
+    let pointName = await db.query(aql`
+    FOR point IN Points
+    FILTER POSITION(point.names, ${word})
+    RETURN point.name
+    `).then(cursor => cursor.next());
+    if (pointName) route.push(pointName);
   }
   return route;
 }
@@ -71,7 +73,7 @@ function roleParser(body) {
   return null;
 }
 
-function parseMsg(msg) {
+async function parseMsg(msg) {
   let rec = {
     role: null,
     from: null,
@@ -84,15 +86,12 @@ function parseMsg(msg) {
   rec.role = roleParser(msg.Body);
   if (rec.role === 'M') return rec;
   rec.cargo = cargoParser(msg.Body);
-  rec.tels = telParser(msg.Body);
+  rec.tels = telParser(msg.Body);  
 
-  rec.from = parseDirection('from', msg.Body);
-  rec.to = parseDirection('to', msg.Body);
-
-  rec.cleanedBody = cleanBody(msg.Body);
-  rec.route = routeParser(msg.Body);
+  rec.cleanedBody = await cleanBody(msg.Body);
+  rec.route = await routeParser(msg.Body);
 
   return rec;
 }
 
-module.exports = { parseDirection, telParser, roleParser, parseMsg, cargoParser, routeParser };
+module.exports = { telParser, roleParser, parseMsg, cargoParser, routeParser };

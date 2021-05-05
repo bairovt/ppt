@@ -7,7 +7,8 @@ describe('cleanBody func', () => {
   for (let msg of msgs) {
     if (msg.cleanedBody) {
       test(msg.body, () => {
-        expect(cleanBody(msg.body)).toBe(msg.cleanedBody);
+        // const cleanedBody = await cleanBody(msg.body);
+        return expect(cleanBody(msg.body)).resolves.toBe(msg.cleanedBody);
       });
     }
   }
@@ -17,7 +18,8 @@ describe('routeParser', ()=> {
   for (let msg of msgs) {
     if (!msg.skip && msg.route) {
       test(msg.body, () => {
-        expect(routeParser(msg.body)).toEqual(msg.route);
+        // const route = await routeParser(msg.body);
+        return expect(routeParser(msg.body)).resolves.toEqual(msg.route);
       });
     }
   }   

@@ -1,6 +1,6 @@
-const {checkRegexPoints} = require('../parse/clean-body-parser.js');
+const {checkPairedNames} = require('../parse/clean-body-parser.js');
 
-let str = checkRegexPoints(
+let str = await checkRegexPoints(
   'Сегодня с иркутска в ночь до у-удэ возьму 2 человек только звоните 89025624498'
 );
 
