@@ -1,11 +1,11 @@
 const points = require('../../data/points.js');
 
 //todo: сделать проверку городов на cleanBody
-function checkPairedNames(str) {
-  // todo: optimize this in the future
+function checkRegexPoints(str) {
+  // todo: optimize this
   let newStr = str;
-  let pairedNamePoints = points.filter((point) => !!point.regex);
-  for (let point of pairedNamePoints) {
+  let regexPoints = points.filter((point) => !!point.regex);
+  for (let point of regexPoints) {
     newStr = newStr.replace(point.regex, ' ' + point.names[0] + ' ')
   }
   return newStr;
@@ -43,7 +43,7 @@ function cleanBody(body) {
 
   // str = str.replace(/\s{2,}/gi, ' ');
   str = str.replace(/\s*\-\s*/gi, '-'); // тире, окруженное пробелами, на тире
-  str = checkPairedNames(str);
+  str = checkRegexPoints(str);
   str = str.replace(/\-/gi, ' '); // все тире на пробелы, т.к. парные назв уже обработаны
 
   str = str.replace(/\s\S{1,2}\s/gi, ' '); // 1-2 буквы между пробелами
@@ -54,4 +54,4 @@ function cleanBody(body) {
   return str.trim();
 }
 
-module.exports = { checkPairedNames, cleanBody};
+module.exports = { checkRegexPoints, cleanBody};
