@@ -9,16 +9,10 @@ const path = require('path');
 
 const root = config.get('root');
 
-const recsCollection = db.collection('Recs');
-
 async function fetchParseLoad() {
   let startTime = Date.now();
   let msgs = [];
-  const recs = [];
-  const dupls = {
-    allCount: 0,
-    M: 0,
-  };
+  const recs = [];  
   
   const chats = await db
     .collection('ViberChats')
@@ -47,33 +41,41 @@ async function fetchParseLoad() {
     for (let msg of msgs) {
       const recData = parseMsg(msg);
       if (recData.route.length < 2) {
-        await db.collection('UnroutedRecs').save(recData);
-      } else { // 
-        recData.src = 'viber';
+        const UnroutedRecsColl = db.collection('UnroutedRecs');
         try {
-          const rec = await recsCollection.save(recData, { returnNew: true });
-          recs.push(rec);
+          await UnroutedRecsColl.save(recData);
         } catch (err) {
-          // unique constraint violated
           if (err.code === 409 && err.errorNum === 1210) {
-            let existingRec = await recsCollection
-              .byExample({ Body: recData.Body })
-              .then((cursor) => cursor.next());
-
-            if (existingRec.TimeStamp < recData.TimeStamp) {
-              await recsCollection.update(existingRec._id, recData);
-            }
-
-            dupls.allCount++;
-            if (existingRec.role == 'M') {
-              dupls.M++;
-            }
+            const existingRec = await UnroutedRecsColl.byExample({
+              Body: recData.Body,
+            }).then((cursor) => cursor.next());
+            recData.dupls = existingRec.dupls ? existingRec.dupls + 1 : 1;
+            await UnroutedRecsColl.update(existingRec._id, recData);            
           } else {
             throw err;
           }
         }
-      }
-      // throw new Error('bla bla err');
+      } else {
+        const RecsColl = db.collection('Recs');
+        recData.src = 'viber';
+        try {
+          const rec = await RecsColl.save(recData, { returnNew: true });
+          recs.push(rec);
+        } catch (err) {
+          // unique constraint violated
+          if (err.code === 409 && err.errorNum === 1210) {
+            let existingRec = await RecsColl
+              .byExample({ Body: recData.Body })
+              .then((cursor) => cursor.next());
+
+            if (existingRec.TimeStamp < recData.TimeStamp) {
+              await RecsColl.update(existingRec._id, recData);
+            }            
+          } else {
+            throw err;
+          }
+        }
+      }      
     }   
 
   } catch (error) {
@@ -86,9 +88,7 @@ async function fetchParseLoad() {
 
   if (process.env.NODE_ENV === 'development') {
     console.log('new msgs count: ', msgs.length);
-    console.log('new recs count: ', recs.length);
-    console.log('existing recs count: ', dupls.allCount);
-    console.log('existing M recs count: ', dupls.M);
+    console.log('new recs count: ', recs.length);    
     console.log(Date.now() - startTime + ' мс\n-----');
   }
 }
@@ -100,7 +100,7 @@ function delaySec(sec) {
 }
 
 async function main() {
-  // await recsCollection.truncate();
+  // await RecsColl.truncate();
   while (true) {
     await fetchParseLoad();
     await delaySec(10);
@@ -115,9 +115,5 @@ function gracefulStop(msg) {
   db.close();
   process.exit();
 }
-process.once('SIGINT', () => {
-  gracefulStop('\nSIGINT')
-})
-process.once('\nSIGTERM', () => {
-  gracefulStop('\nSIGTERM'); 
-})
+process.once('SIGINT', () => gracefulStop('\nSIGINT'));
+process.once('\nSIGTERM', () => gracefulStop('\nSIGTERM'));
