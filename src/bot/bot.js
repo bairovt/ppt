@@ -89,7 +89,7 @@ bot.on('text', async (ctx, next) => {
   const user = ctx.state.user;
   const text = ctx.update.message.text;
 
-  const route = routeParser(text);
+  const route = await routeParser(text);
   if (route.length < 2) {
     ctx.reply(
       'По маршруту ' + JSON.stringify(route) + '\nничего не найдено.\nНеобходимо 2 нас. пункта'

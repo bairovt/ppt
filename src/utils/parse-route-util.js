@@ -1,5 +1,8 @@
 const { routeParser } = require('../parse/parser.js');
 
-let route = routeParser('читу уу');
+async function main () {
+  let route = await routeParser('Есть 3 места с Богини Янжимы до Улан-Удэ 89246596622');
+  console.log(route);
+}
 
-console.log(route);
+main();
