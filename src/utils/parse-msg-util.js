@@ -2,8 +2,7 @@ const { roleParser, telParser, routeParser } = require('../parse/parser.js');
 const { cleanBody } = require('../parse/clean-body-parser.js');
 
 async function main () {
-  const body =
-    'завтра после 10.30 кто-нибудь едит с Читы до Борзи？возьмите двух пасажиров（один ребенок кресло есть）';
+  const body = '7.05. Еду с Никольска в уу в 10 утра\nЕсть 2 места, 8914636029';
 
   let rec = {};
   rec.Body = body;
