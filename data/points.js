@@ -265,7 +265,7 @@ const points = [
     _key: 'Muhorshibir',
     name: 'Мухоршибирь',
     names: ['мухоршибирь'],
-    regex: /мух(о|а)р\s|\sм\-?ш\s/gi,
+    regex: /мух(о|а)р(\s|\-)(шибир.)?|\sм(\s|\-)?ш\s/gi,
   },
   {
     _key: 'SherlovayGora',
