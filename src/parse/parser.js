@@ -30,7 +30,8 @@ async function routeParser(body) {
   const route = [];
   let cleanedBody = await cleanBody(body);
   let words = cleanedBody.split(/\s|\-/);
-  for (let word of words) {    
+  for (let word of words) {
+    word = word.replace(/[аеиуыюя]$/, ''); // удаляем окончания склонений, кроме о й
     let pointName = await db.query(aql`
     FOR point IN Points
     FILTER POSITION(point.names, ${word})
