@@ -76,9 +76,7 @@ function roleParser(body) {
 
 async function parseMsg(msg) {
   let rec = {
-    role: null,
-    from: null,
-    to: null,
+    role: null,    
     tels: null,
     route: [],
     ...msg,    
