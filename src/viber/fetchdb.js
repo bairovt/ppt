@@ -39,9 +39,10 @@ function fetchViberDb(chats, eventId, limit) {
       AND ChatInfo.Token IN (${chatTokensParams}) 
       AND MType NOT IN (9, 2, 69) 
       AND Body IS NOT null 
+      AND Body NOT LIKE '%http%'
       AND length(Body) > 20 
-      AND length(Body) < 200 ` + 
-      `ORDER BY EventID ASC ` + 
+      AND length(Body) < 200 ` +
+      `ORDER BY EventID ASC ` +
       `LIMIT $limit`
   );
   return sqlStmt.all(chatTokens, { eventId, limit });

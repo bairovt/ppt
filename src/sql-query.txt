@@ -17,3 +17,9 @@ AND Body NOT Like '%Попутчики 03%'
 AND Body NOT Like '%Попутчики Забайкальский край%'
 --AND Body NOT Like '%milllioner%'
 ORDER BY Events.TimeStamp DESC;
+
+////
+SELEcT Body FROM Messages JOIN Events ON Messages.EventID = Events.EventID
+--WHERE "Events"."Type"=9
+--WHERE Body LIKE '%gh%';
+ORDER BY Events.TimeStamp DESC;

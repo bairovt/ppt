@@ -11,7 +11,7 @@ const root = config.get('root');
 
 async function fetchParseLoad() {
   let startTime = Date.now();
-  let msgs = [];
+  let viberMsgs = [];
   const recs = [];  
   
   const chats = await db
@@ -34,12 +34,17 @@ async function fetchParseLoad() {
       lastEventId = getStartEventId(24 * 3);
     }
     
-    msgs = fetchViberDb(chats, lastEventId, 10000);    
+    viberMsgs = fetchViberDb(chats, lastEventId, 10000);
+    console.log(viberMsgs);
 
     // throw new Error();
 
-    for (let msg of msgs) {
-      const recData = await parseMsg(msg);
+    for (let viberMsgData of viberMsgs) {
+      if (/выигр|продам|купл(ю|им)|сниму/i.test(viberMsgData.Body)) continue;
+
+      const recData = await parseMsg(viberMsgData);
+
+      // fix  this
       if (recData.route.length < 2) {
         const UnroutedRecsColl = db.collection('UnroutedRecs');
         try {
@@ -87,7 +92,7 @@ async function fetchParseLoad() {
   }
 
   if (process.env.NODE_ENV === 'development') {
-    console.log('new msgs count: ', msgs.length);
+    console.log('new viberMsgs count: ', viberMsgs.length);
     console.log('new recs count: ', recs.length);    
     console.log(Date.now() - startTime + ' мс\n-----');
   }
