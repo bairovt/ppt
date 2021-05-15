@@ -34,55 +34,32 @@ async function fetchParseLoad() {
       lastEventId = getStartEventId(24 * 3);
     }
     
-    viberMsgs = fetchViberDb(chats, lastEventId, 10000);
-    console.log(viberMsgs);
-
-    // throw new Error();
+    viberMsgs = fetchViberDb(chats, lastEventId, 10000);    
 
     for (let viberMsgData of viberMsgs) {
       if (/выигр|продам|купл(ю|им)|сниму/i.test(viberMsgData.Body)) continue;
 
       const recData = await parseMsg(viberMsgData);
-
-      // fix  this
-      if (recData.route.length < 2) {
-        const UnroutedRecsColl = db.collection('UnroutedRecs');
-        try {
-          await UnroutedRecsColl.save(recData);
-        } catch (err) {
-          if (err.code === 409 && err.errorNum === 1210) {
-            const existingRec = await UnroutedRecsColl.byExample({
-              Body: recData.Body,
-            }).then((cursor) => cursor.next());
-            recData.dupls = existingRec.dupls ? existingRec.dupls + 1 : 1;
-            await UnroutedRecsColl.update(existingRec._id, recData);            
-          } else {
-            throw err;
-          }
+     
+      const RecsColl = db.collection('Recs');
+      recData.src = 'viber';
+      if (recData.route.length < 2) recData.ur = true;
+      try {
+        const rec = await RecsColl.save(recData, { returnNew: true });
+        recs.push(rec);
+      } catch (err) {
+        // unique constraint violated
+        if (err.code === 409 && err.errorNum === 1210) {
+          let existingRec = await RecsColl
+            .byExample({ Body: recData.Body })
+            .then((cursor) => cursor.next());
+          recData.dupl = existingRec.dupl ? existingRec.dupl + 1 : 1;                     
+          await RecsColl.update(existingRec._id, recData);  
+        } else {
+          throw err;
         }
-      } else {
-        const RecsColl = db.collection('Recs');
-        recData.src = 'viber';
-        try {
-          const rec = await RecsColl.save(recData, { returnNew: true });
-          recs.push(rec);
-        } catch (err) {
-          // unique constraint violated
-          if (err.code === 409 && err.errorNum === 1210) {
-            let existingRec = await RecsColl
-              .byExample({ Body: recData.Body })
-              .then((cursor) => cursor.next());
-
-            if (existingRec.TimeStamp < recData.TimeStamp) {
-              await RecsColl.update(existingRec._id, recData);
-            }            
-          } else {
-            throw err;
-          }
-        }
-      }      
-    }   
-
+      }          
+    }
   } catch (error) {
     writeFileSync(
       path.join(root, 'log', Date.now() + '-viber-fetch.error'),
