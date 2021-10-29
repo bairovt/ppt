@@ -1,7 +1,7 @@
 
 const { cleanBody } = require('../src/parse/clean-body-parser.js');
 const { roleParser, cargoParser, routeParser } = require('../src/parse/parser.js');
-const msgs = require('./test-msgs.js');
+const msgs = require('./msgs.js');
 
 describe('cleanBody func', () => {
   for (let msg of msgs) {

@@ -12,6 +12,7 @@ const { menuBtnKb, setRoleKbi, menuItemsKbi } = require('./keyboards.js');
 const feedbackScene = require('./scenes/feedback-scene.js');
 const attachTelScene = require('./scenes/attach-tel-scene.js');
 const deleteAdsStage = require('./scenes/delete-ads-scene.js');
+const fastify = require('fastify')({logger: true});
 
 ////////////////////////////////////////////////////////////////
 
@@ -171,3 +172,26 @@ bot.action('feedback', async (ctx) => {
 bot.launch();
 process.once('SIGINT', () => bot.stop('SIGINT'))
 process.once('SIGTERM', () => bot.stop('SIGTERM'))
+
+// Fastify 
+fastify.get('/', async (req, reply) => {
+  // await bot.telegram.sendMessage(429613736, req.body);
+  console.log(typeof(req.body));
+  return { hello: 'world' };
+});
+
+fastify.post('/notify', async (req, reply) => {
+  await bot.telegram.sendMessage(req.body.chat_id, req.body.Body);
+  return { status: 'OK' };
+});
+
+// run the fastify server!
+const runFastify = async () => {
+  try {
+    await fastify.listen(3030)
+  } catch (err) {
+    fastify.log.error(err)
+    process.exit(1)
+  }
+}
+runFastify();

@@ -6,18 +6,31 @@ const { fetchViberDb, getStartEventId } = require('./viber/fetchdb.js');
 const { parseMsg } = require('./parse/parser.js');
 const { writeFileSync } = require('fs');
 const path = require('path');
+const fillSubs = require('./utils/fill-subscriptions');
+const axios = require('axios').default;
 
 const root = config.get('root');
 
 async function fetchParseLoad() {
   let startTime = Date.now();
   let viberMsgs = [];
-  const recs = [];  
+  const recs = [];
+  const subsToNotify = [];
   
-  const chats = await db
-    .collection('ViberChats')
-    .all()
-    .then((cursor) => cursor.all());
+  const [chats, subs] = await Promise.all([
+    await db.query(
+      aql`
+      FOR chat in ViberChats        
+        RETURN chat`
+    )
+    .then((cursor) => cursor.all()),
+    await db.query(
+      aql`
+      FOR sub in Subs        
+        RETURN sub`
+    )
+    .then((cursor) => cursor.all())
+    ]);
 
   try {
     let lastEventId = await db
@@ -37,28 +50,32 @@ async function fetchParseLoad() {
     viberMsgs = fetchViberDb(chats, lastEventId, 10000);    
 
     for (let viberMsgData of viberMsgs) {
-      if (/выигр|продам|купл(ю|им)|сниму/i.test(viberMsgData.Body)) continue;
+      if (/выигр|продам|купл(ю|им)|сниму/i.test(viberMsgData.Body)) continue; // skip spam
 
       const recData = await parseMsg(viberMsgData);
      
-      const RecsColl = db.collection('Recs');
+      const collRecs = db.collection('Recs');
       recData.src = 'viber';
       if (recData.route.length < 2) recData.ur = true;
       try {
-        const rec = await RecsColl.save(recData, { returnNew: true });
+        const rec = await collRecs.save(recData, { returnNew: true });
         recs.push(rec);
       } catch (err) {
         // unique constraint violated
         if (err.code === 409 && err.errorNum === 1210) {
-          let existingRec = await RecsColl
+          let existingRec = await collRecs
             .byExample({ Body: recData.Body })
             .then((cursor) => cursor.next());
           recData.dupl = existingRec.dupl ? existingRec.dupl + 1 : 1;                     
-          await RecsColl.update(existingRec._id, recData);  
+          await collRecs.update(existingRec._id, recData);  
         } else {
           throw err;
         }
-      }          
+      }
+
+      if (recData.route.length >= 2) {
+        subsToNotify.push(...fillSubs(recData, subs));
+      }
     }
   } catch (error) {
     writeFileSync(
@@ -73,6 +90,12 @@ async function fetchParseLoad() {
     console.log('new recs count: ', recs.length);    
     console.log(Date.now() - startTime + ' мс\n-----');
   }
+
+  // notify subs
+  await Promise.all(subsToNotify.map((sub) => {
+    axios.post('http://localhost:3030/notify', sub);
+  }));
+
 }
 
 function delaySec(sec) {
@@ -82,7 +105,7 @@ function delaySec(sec) {
 }
 
 async function main() {
-  // await RecsColl.truncate();
+  // await collRecs.truncate();
   while (true) {
     await fetchParseLoad();
     await delaySec(10);
