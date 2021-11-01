@@ -4,7 +4,7 @@ function fillSubs(recData, subs) {
     const fromIndex = recData.route.indexOf(sub.route[0]);
     const toIndex = recData.route.indexOf(sub.route[1]);
     if (fromIndex !== -1 && toIndex !== -1 && fromIndex < toIndex) {
-      filledSubs.push({Body: recData.Body, ...sub});
+      filledSubs.push({Body: recData.Body, src: recData.src, ChatName: recData.ChatName, ...sub});
     }
   }
   return filledSubs;

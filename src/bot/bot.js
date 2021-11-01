@@ -175,13 +175,12 @@ process.once('SIGTERM', () => bot.stop('SIGTERM'))
 
 // Fastify 
 fastify.get('/', async (req, reply) => {
-  // await bot.telegram.sendMessage(429613736, req.body);
-  console.log(typeof(req.body));
   return { hello: 'world' };
 });
 
 fastify.post('/notify', async (req, reply) => {
-  await bot.telegram.sendMessage(req.body.chat_id, req.body.Body);
+  const body = `(${req.body.src}: ${req.body.ChatName})\n` + req.body.Body;
+  await bot.telegram.sendMessage(req.body.chat_id, body);
   return { status: 'OK' };
 });
 

@@ -90,11 +90,17 @@ async function fetchParseLoad() {
     console.log('new recs count: ', recs.length);    
     console.log(Date.now() - startTime + ' мс\n-----');
   }
-
-  // notify subs
-  await Promise.all(subsToNotify.map((sub) => {
-    axios.post('http://localhost:3030/notify', sub);
-  }));
+  
+  console.log('subsToNotify.length', subsToNotify.length);
+  let catchedCnt = 0;
+  await Promise.all(
+    subsToNotify.map((sub) => {
+      axios.post('http://localhost:3030/notify', sub).catch((err) => {
+        catchedCnt++;
+        console.error(catchedCnt);
+      });
+    })
+  );
 
 }
 
