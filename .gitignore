@@ -5,7 +5,8 @@ public/
 npm-debug.log
 config/production.*
 config/development.*
-log/
+logs/*
+!logs/.gitkeep
 aql/
 test_data/
 result_recs.json
@@ -15,3 +16,4 @@ tmp.js
 refs-to-add.txt
 points-to-add.txt
 доп/
+tmp/*

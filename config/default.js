@@ -20,6 +20,9 @@ module.exports = {
   },
   bot: {
     token: 'bot-token-blah-blah',
-    adsInterval: 2
+    adsInterval: 2,
   },
+  LOGS_DIR: 'logs',
+  ADMIN_CHAT_ID: 123456789,
+  BOT_HTTP_URL: 'http://localhost:3030'
 };

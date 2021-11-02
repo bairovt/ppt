@@ -1,8 +1,6 @@
 const db = require('../../lib/arangodb.js');
-const { aql } = require('arangojs');
 const {
   Telegraf,
-  session,
   Markup,
   Scenes: { BaseScene },
 } = require('telegraf');

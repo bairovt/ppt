@@ -1,4 +1,4 @@
-const { Telegraf, session, Markup, Scenes: {Stage} } = require('telegraf');
+const { Telegraf, Markup, Scenes: {Stage} } = require('telegraf');
 const { routeParser } = require('../parse/parser.js');
 const { findRoute } = require('../findRoute.js');
 const { setUser, getUser, setUserRole, logToDb } = require('../bot/user.js');
@@ -16,18 +16,17 @@ const fastify = require('fastify')({logger: true});
 
 ////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////
-
 const bot = new Telegraf(config.get('bot.token'));
-bot.use(session());
 
-bot.catch((error, ctx) => {
-  ctx.reply('ошибка!');
+bot.catch(async (error, ctx) => {
+  const txtErrorLog = errorLog(error, { update: ctx.update, state: ctx.state, botInfo: ctx.botInfo });
+  await bot.telegram.sendMessage(config.get('ADMIN_CHAT_ID'), txtErrorLog);
+  ctx.reply('Что-то пошло не так.. Сообщение об ошибке уже отправлено администратору бота');
   writeFileSync(
-    path.join(config.get('root'), 'log', Date.now() + '-bot.error'),
-    errorLog(error, {update: ctx.update, state: ctx.state, botInfo: ctx.botInfo}, ctx)
+    path.join(config.get('root'), config.get('LOGS_DIR'), Date.now() + '-bot.error'),
+    txtErrorLog
   );
-  throw(error);
+  // throw(error);
 });
 
 bot.start(async (ctx) => {
@@ -169,10 +168,6 @@ bot.action('feedback', async (ctx) => {
   ctx.scene.enter('feedbackScene');
 });
 
-bot.launch();
-process.once('SIGINT', () => bot.stop('SIGINT'))
-process.once('SIGTERM', () => bot.stop('SIGTERM'))
-
 // Fastify 
 fastify.get('/', async (req, reply) => {
   return { hello: 'world' };
@@ -181,6 +176,11 @@ fastify.get('/', async (req, reply) => {
 fastify.post('/notify', async (req, reply) => {
   const body = `(${req.body.src}: ${req.body.ChatName})\n` + req.body.Body;
   await bot.telegram.sendMessage(req.body.chat_id, body);
+  return { status: 'OK' };
+});
+
+fastify.post('/alert/admin', async (req, reply) => {
+  await bot.telegram.sendMessage(config.get('ADMIN_CHAT_ID'), 'ALERT!\n' + JSON.stringify(req.body, null, 2));
   return { status: 'OK' };
 });
 
@@ -193,4 +193,23 @@ const runFastify = async () => {
     process.exit(1)
   }
 }
+
+bot.launch();
 runFastify();
+
+function gracefulStop(code) {
+  console.log(`\nstopped by ${code}`);  
+  bot.stop(code);
+  fastify.close().then(
+    () => {
+      console.log('Fastify server closed');
+    },
+    (err) => {
+      console.log('an error happened fastify.close()', err);
+    }
+  );
+}
+
+// process.once('SIGINT', () => {
+process.once('SIGINT', (code) => gracefulStop(code));
+process.once('SIGTERM', (code) => gracefulStop(code));

@@ -10,8 +10,9 @@ const db = new Database(config.get('sqlite.dbpath'), {
 
 
 function getStartEventId(hours) {
-  const now = Date.now();
-  const startTimestamp = now - hours * 3600 * 1000;
+  const date = new Date();
+  const todayMidnight = date.setHours(0, 0, 0, 0);
+  const startTimestamp = todayMidnight - hours * 3600 * 1000;
 
   const sqlStmt = db.prepare(
     `SELECT EventID FROM Events 

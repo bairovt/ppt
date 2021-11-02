@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "bot": "cross-env NODE_ENV=development nodemon ./src/bot/bot.js",
-    "viber": "node ./src/viber-fetch-parse-load.js",
+    "viber": "cross-env NODE_ENV=development node ./src/viber-fetch-parse-load.js",
     "vk": "node ./src/vk-fetch-parse-load.js",
     "test": "jest",
     "cbu": "node ./src/utils/clean-body-util.js",

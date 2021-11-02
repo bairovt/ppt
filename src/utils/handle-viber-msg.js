@@ -2,15 +2,16 @@ const fillSubs = require('../utils/fill-subscriptions.js');
 const { parseMsg } = require('../parse/parser.js');
 const db = require('../lib/arangodb.js');
 const axios = require('axios').default;
+const config = require('config');
 
-async function handleViberMsg(viberMsgData, subs, stat) {
+async function handleViberMsg(viberMsg, subs, stat) {
   // skip spam
-  if (/выигр|продам|купл(ю|им)|сниму/i.test(viberMsgData.Body)) {
+  if (/выигр|продам|купл(ю|им)|сниму/i.test(viberMsg.Body)) {
     stat.spamMsgsCnt++;
-    return null;
+    return 'SPAM';
   }
 
-  const recData = await parseMsg(viberMsgData);
+  const recData = await parseMsg(viberMsg);
   recData.src = 'viber';
 
   const collRecs = db.collection('Recs');
@@ -35,16 +36,19 @@ async function handleViberMsg(viberMsgData, subs, stat) {
     }
   } else {    
     try {
-      await collRecs.save(recData); //may throw unique constraint violated error (Body)
       stat.newRecsCnt++;
+      await collRecs.save(recData); //may throw unique constraint violated error (Body)
+      stat.savedRecsCnt++;
       // nofify satisfying subscriptions
       const subsToNotify = fillSubs(recData, subs);
       stat.notifySubsCnt = stat.notifySubsCnt + subsToNotify.length;
       
       await Promise.all(
-        subsToNotify.map((sub) => {
-          axios.post('http://localhost:3030/notify', sub).catch((err) => {
-            stat.catchedAxiosCnt++;
+        subsToNotify.map((sub) => {                    
+          axios.post(`${config.get('BOT_HTTP_URL')}/notify`, sub).catch((err) => {
+            stat.axiosErrors[err.code] =
+              err.code in stat.axiosErrors ? ++stat.axiosErrors[err.code] : 1;
+            // throw err // // todo: who not catched in outer catch??
           });
         })
       );

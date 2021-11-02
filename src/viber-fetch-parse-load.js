@@ -2,11 +2,9 @@ const db = require('./lib/arangodb.js');
 const {errorLog} = require('./lib/error-log.js');
 const config = require('config');
 const { fetchViberDb, getStartEventId } = require('./viber/fetchdb.js');
-
 const { writeFileSync } = require('fs');
 const path = require('path');
-
-
+const axios = require('axios').default;
 const ViberChat = require('./classes/viber-chat.js')
 const Subscription = require('./classes/subscription.js');
 const Rec = require('./classes/record.js');
@@ -22,9 +20,15 @@ async function fetchParseLoad() {
     spamMsgsCnt: 0,
     unroutedRecsCnt: 0,
     newRecsCnt: 0,
+    savedRecsCnt: 0,
     duplRecsCnt: 0,
     notifySubsCnt: 0,
-    catchedAxiosCnt: 0,
+    axiosErrors: {
+      ENOTFOUND: 0,
+    },
+    handleViberMsgErrors: {
+      ERR409: 0,
+    },
   };  
 
   const [
@@ -45,12 +49,34 @@ async function fetchParseLoad() {
     const viberMsgs = fetchViberDb(chats, viberLastEventId, 10000); // sync from SQLite
     stat.viberMsgsCnt = viberMsgs.length;
 
-    for (let viberMsgData of viberMsgs) {
-      await handleViberMsg(viberMsgData, subs, stat);      
-    }
+    // for (let viberMsgData of viberMsgs) {
+    //   await handleViberMsg(viberMsgData, subs, stat);
+    // }
+
+    await Promise.all(viberMsgs.map((viberMsg) => {
+      return handleViberMsg(viberMsg, subs, stat).then(res => 'OK').catch(err => {        
+        if (err.code === 409) {
+          stat.handleViberMsgErrors.ERR409++; 
+        } else {
+          throw err;
+        }
+      });
+    }));    
+
   } catch (error) {
-    writeFileSync(path.join(root, 'log', Date.now() + '-viber-fetch.error'), errorLog(error));
-    throw error;
+    writeFileSync(
+      path.join(root, config.get('LOGS_DIR'), Date.now() + '-viber-fetch.error'),
+      errorLog(error, { stat })
+    );    
+    console.error('ERROR!', error);
+    // throw error;
+  }
+
+  if (stat.axiosErrors.ENOTFOUND || stat.handleViberMsgErrors.ERR409) {    
+    axios.post(`${config.get('BOT_HTTP_URL')}/alert/admin`, stat).catch((err) => {
+      console.error(err);
+      throw err;
+    });
   }
 
   if (process.env.NODE_ENV === 'development') {
@@ -65,8 +91,7 @@ function delaySec(sec) {
   })
 }
 
-async function main() {
-  // await collRecs.truncate();
+async function main() {  
   while (true) {
     await fetchParseLoad();
     await delaySec(10);
