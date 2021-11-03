@@ -27,7 +27,7 @@ async function fetchParseLoad() {
       ENOTFOUND: 0,
     },
     handleViberMsgErrors: {
-      ERR409: 0,
+      ERR1200: 0,
     },
   };  
 
@@ -55,8 +55,8 @@ async function fetchParseLoad() {
 
     await Promise.all(viberMsgs.map((viberMsg) => {
       return handleViberMsg(viberMsg, subs, stat).then(res => 'OK').catch(err => {        
-        if (err.code === 409) {
-          stat.handleViberMsgErrors.ERR409++; 
+        if (err.code === 409 && err.errorNum === 1200) {
+          stat.handleViberMsgErrors.ERR1200++; 
         } else {
           throw err;
         }
@@ -72,7 +72,7 @@ async function fetchParseLoad() {
     // throw error;
   }
 
-  if (stat.axiosErrors.ENOTFOUND || stat.handleViberMsgErrors.ERR409) {    
+  if (stat.axiosErrors.ENOTFOUND || stat.handleViberMsgErrors.ERR1200) {    
     axios.post(`${config.get('BOT_HTTP_URL')}/alert/admin`, stat).catch((err) => {
       console.error(err);
       throw err;
